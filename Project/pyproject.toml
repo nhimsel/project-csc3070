@@ -1,5 +1,5 @@
 [project]
-name = "PySide Widgets Project"
+name = "Project"
 
 [tool.pyside6-project]
-files = ["window.py", "form.ui"]
+files = ["test.py", "tray.py", "window.py", "form.ui"]
