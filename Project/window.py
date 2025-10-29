@@ -9,6 +9,7 @@ from PySide6.QtGui import QIcon
 #     pyside2-uic form.ui -o ui_form.py
 from ui_form import Ui_Window
 from tray import TrayIcon
+from openai import send_message
 
 
 class Window(QMainWindow):
@@ -18,22 +19,24 @@ class Window(QMainWindow):
         self.ui.setupUi(self)
 
         self.setWindowTitle("test")
-        self.ui.lineEdit.textChanged.connect(self.sync_tex)
+        self.ui.pushButton.clicked.connect(self.message_send)
 
         # create tray helper (it will be a no-op if system tray is unavailable)
         self.tray = TrayIcon(self)
 
-    def sync_tex(self):
-        if self.ui.lineEdit.text() != self.ui.lineEdit_2.text():
-            self.ui.lineEdit_2.setText(self.ui.lineEdit.text())
+    def message_send(self):
+        input=self.ui.textEdit.toPlainText()
+        send_message(input, self.ui.textEdit_2)
 
     def closeEvent(self, event):
         # minimize to tray instead of quitting
         event.ignore()
         self.hide()
+
         # use tray helper to show an optional message
-        if getattr(self, "tray", None) and self.tray.is_available:
-            self.tray.show_message("test", "Application minimized to tray")
+    ## this notification is kinda annoying.
+        #if getattr(self, "tray", None) and self.tray.is_available:
+        #    self.tray.show_message("test", "Application minimized to tray")
 
     def on_tray_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
