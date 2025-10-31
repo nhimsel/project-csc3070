@@ -3,10 +3,10 @@
 import requests
 import sseclient
 import json
+import config
 
 
-# todo: add to config file?
-url = "http://127.0.0.1:5000/v1/chat/completions"
+url=config.load("api_url")
 
 headers = {
     "Content-Type": "application/json"
