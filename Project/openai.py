@@ -6,7 +6,13 @@ import json
 import config
 
 
-url=config.load("api_url")
+DEFAULT_URL="http://127.0.0.1:5000/v1/chat/completions"
+
+# try to load config, else use DEFAULT
+try:
+    url=config.load("api_url")
+except Exception:
+    url=DEFAULT_URL
 
 headers = {
     "Content-Type": "application/json"
@@ -14,7 +20,12 @@ headers = {
 
 history = []
 
-    
+def _show_error(output_line_edit, msg):
+    try:
+        output_line_edit.setText(f"Error: {msg}")
+    except Exception:
+        # best-effort: ignore UI errors
+        pass
 
 def send_message(user_message, output_line_edit):
     history.append({"role": "user", "content": user_message})
@@ -26,16 +37,49 @@ def send_message(user_message, output_line_edit):
         "top_k": 20
     }
 
-    stream_response = requests.post(url, headers=headers, json=data, verify=False, stream=True)
-    client = sseclient.SSEClient(stream_response)
+    # attempt request and handle connection / HTTP errors
+    try:
+        stream_response = requests.post(url, headers=headers, json=data, verify=False, stream=True, timeout=10)
+    except requests.RequestException as e:
+        err = str(e)
+        _show_error(output_line_edit, err)
+        # record assistant error in history
+        history.append({"role": "assistant", "content": f"Error: {err}"})
+        return
 
-    assistant_message = ''
-    for event in client.events():
-        payload = json.loads(event.data)
-        chunk = payload['choices'][0]['delta']['content']
-        assistant_message += chunk
-        #print(chunk, end='')
-        output_line_edit.setText(assistant_message)
+    if not (200 <= stream_response.status_code < 300):
+        # non-success HTTP response
+        body = ""
+        try:
+            body = stream_response.text
+        except Exception:
+            body = "<no body>"
+        err = f"HTTP {stream_response.status_code}: {body}"
+        _show_error(output_line_edit, err)
+        history.append({"role": "assistant", "content": f"Error: {err}"})
+        return
 
-    #print()
+    # stream events; handle parsing/stream errors
+    try:
+        client = sseclient.SSEClient(stream_response)
+        assistant_message = ''
+        for event in client.events():
+            # some events may be keep-alive or empty
+            if not event.data:
+                continue
+            payload = json.loads(event.data)
+            # be defensive about payload shape
+            chunk = ""
+            try:
+                chunk = payload['choices'][0]['delta'].get('content', "") if 'choices' in payload else ""
+            except Exception:
+                chunk = ""
+            assistant_message += chunk
+            output_line_edit.setText(assistant_message)
+    except Exception as e:
+        err = str(e)
+        _show_error(output_line_edit, err)
+        history.append({"role": "assistant", "content": f"Error: {err}"})
+        return
+
     history.append({"role": "assistant", "content": assistant_message})
