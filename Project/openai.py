@@ -27,7 +27,8 @@ def _show_error(output_line_edit, msg):
         # best-effort: ignore UI errors
         pass
 
-def send_message(user_message, output_line_edit):
+#def send_message(user_message, output_line_edit):
+def send_message(user_message):
     history.append({"role": "user", "content": user_message})
     data = {
         "stream": True,
@@ -42,9 +43,8 @@ def send_message(user_message, output_line_edit):
         stream_response = requests.post(url, headers=headers, json=data, verify=False, stream=True, timeout=10)
     except requests.RequestException as e:
         err = str(e)
-        _show_error(output_line_edit, err)
-        # record assistant error in history
-        history.append({"role": "assistant", "content": f"Error: {err}"})
+        #_show_error(output_line_edit, err)
+        return err
         return
 
     if not (200 <= stream_response.status_code < 300):
@@ -55,8 +55,8 @@ def send_message(user_message, output_line_edit):
         except Exception:
             body = "<no body>"
         err = f"HTTP {stream_response.status_code}: {body}"
-        _show_error(output_line_edit, err)
-        history.append({"role": "assistant", "content": f"Error: {err}"})
+        #_show_error(output_line_edit, err)
+        return err
         return
 
     # stream events; handle parsing/stream errors
@@ -75,11 +75,12 @@ def send_message(user_message, output_line_edit):
             except Exception:
                 chunk = ""
             assistant_message += chunk
-            output_line_edit.setText(assistant_message)
+            #output_line_edit.setText(assistant_message)
     except Exception as e:
         err = str(e)
-        _show_error(output_line_edit, err)
+        #_show_error(output_line_edit, err)
+        return err
         history.append({"role": "assistant", "content": f"Error: {err}"})
         return
-
+    return assistant_message
     history.append({"role": "assistant", "content": assistant_message})
