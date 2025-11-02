@@ -22,3 +22,15 @@ pip install -r requirements.txt
 cd Project
 python main.py
 ```
+
+### Configuration:
+
+Configuration is done in `config.json`
+This file should be located in the same directory as `main.py`
+
+
+##### Options
+
+```
+api_url - url for openai-compatible llm api (default: http://127.0.0.1:5000/v1/chat/completions)
+```
