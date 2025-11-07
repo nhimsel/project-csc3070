@@ -21,7 +21,7 @@ class Window(QMainWindow):
         self.ui.pushButton.clicked.connect(self.message_send)
 
         # create tray helper (it will be a no-op if system tray is unavailable)
-        self.tray = TrayIcon(self)
+        # self.tray = TrayIcon(self)
 
     def message_send(self):
         self.ui.pushButton.setDisabled(True)
@@ -53,14 +53,14 @@ class Window(QMainWindow):
         #if getattr(self, "tray", None) and self.tray.is_available:
         #    self.tray.show_message("test", "Application minimized to tray")
 
-    def on_tray_activated(self, reason):
-        if reason == QSystemTrayIcon.ActivationReason.Trigger:
-            if self.isVisible():
-                self.hide()
-            else:
-                self.showNormal()
-                self.raise_()
-                self.activateWindow()
+    # def on_tray_activated(self, reason):
+    #     if reason == QSystemTrayIcon.ActivationReason.Trigger:
+    #         if self.isVisible():
+    #             self.hide()
+    #         else:
+    #             self.showNormal()
+    #             self.raise_()
+    #             self.activateWindow()
 
     def quit_app(self):
         # hide tray icon before quitting
