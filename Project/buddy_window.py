@@ -73,12 +73,7 @@ class ShapedWindow(QWidget):
     # --- Dragging behavior ---
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            #self.offset = event.pos()
-            print(self.cur_anim)
-            if (self.cur_anim == "feesh"):
-                self.switch_gif("feesh-2")
-            else:
-                self.switch_gif("feesh")
+            self.offset = event.pos()
 
 
     def mouseMoveEvent(self, event):
