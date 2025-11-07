@@ -13,11 +13,28 @@ Goal
 
 ### Running:
 
+##### Windows:
+
 ```
 git clone https://github.com/nhimsel/project-csc3070
 cd project-csc3070
 python -m venv venv
 venv\Scripts\activate
+pip install -r requirements.txt
+cd Project
+python main.py
+```
+
+##### Linux:  
+
+Linux builds are currently functional, though support will be broken 
+for future functionality if needed
+
+```
+git clone https://github.com/nhimsel/project-csc3070
+cd project-csc3070
+python -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 cd Project
 python main.py
