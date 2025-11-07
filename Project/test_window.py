@@ -1,9 +1,11 @@
 from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
+from PySide6.QtCore import Signal
 import sys
-from buddy_window import ShapedWindow
 
 class MainWindow(QWidget):
-    def __init__(self, buddy:ShapedWindow):
+    switchGif = Signal(str)
+
+    def __init__(self):
         super().__init__()
         # Create buttons
         self.button1 = QPushButton("feesh")
@@ -18,12 +20,10 @@ class MainWindow(QWidget):
         layout.addWidget(self.button1)
         layout.addWidget(self.button2)
 
-        self.buddy = buddy
-
         self.setLayout(layout)
 
     def on_button1_clicked(self):
-        self.buddy.switch_gif("feesh")
+        self.switchGif.emit("feesh")
 
     def on_button2_clicked(self):
-        self.buddy.switch_gif("feesh-2")
+        self.switchGif.emit("feesh-2")

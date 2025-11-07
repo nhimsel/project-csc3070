@@ -8,7 +8,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = ShapedWindow("feesh")
 
-    test_win = MainWindow(win)
+    test_win = MainWindow()
+    test_win.switchGif.connect(win.switch_gif)
     test_win.show()
 
     if QSystemTrayIcon.isSystemTrayAvailable():
