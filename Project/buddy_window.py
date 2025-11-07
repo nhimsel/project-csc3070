@@ -1,6 +1,6 @@
 import sys
 import os
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap, QMovie
 from PySide6.QtWidgets import QApplication, QLabel, QWidget, QSystemTrayIcon
 from tray import TrayIcon
@@ -8,6 +8,7 @@ from tray import TrayIcon
 anim_dir = "anims"
 
 class ShapedWindow(QWidget):
+    chatSignal = Signal()
     cur_anim = "feesh"
 
     def __init__(self, animation):
@@ -74,6 +75,10 @@ class ShapedWindow(QWidget):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.offset = event.pos()
+        # send message to open chat on right click
+        if event.button() == Qt.RightButton:
+            self.chatSignal.emit()
+
 
 
     def mouseMoveEvent(self, event):

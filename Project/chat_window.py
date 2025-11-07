@@ -10,7 +10,7 @@ from tray import TrayIcon
 from openai import send_message
 
 
-class Window(QMainWindow):
+class ChatWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = Ui_Window()
