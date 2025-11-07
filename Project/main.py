@@ -1,6 +1,6 @@
 import sys
 from PySide6.QtWidgets import QApplication, QSystemTrayIcon
-from window import Window
+from chat_window import Window
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
