@@ -12,6 +12,7 @@ class ShapedWindow(QWidget):
     cur_anim = "feesh"
 
     def __init__(self, animation):
+        self.cur_anim=animation
         anim_name=animation+".gif"
         image_path=os.path.join(anim_dir, anim_name)
         super().__init__()
@@ -62,6 +63,7 @@ class ShapedWindow(QWidget):
     def _update_mask(self):
         pix = self.movie.currentPixmap()
         if not pix.isNull():
+            self.label.resize(pix.size())
             self.label.setMask(pix.mask())
             self.resize(pix.size())
 

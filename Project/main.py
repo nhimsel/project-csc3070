@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     chat_win = ChatWindow()
 
-    buddy_win = ShapedWindow("feesh")
+    buddy_win = ShapedWindow("cat")
     buddy_win.chatSignal.connect(chat_win.show)
 
 
