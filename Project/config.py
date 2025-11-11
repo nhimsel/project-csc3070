@@ -18,7 +18,7 @@ def load(key: str) -> Any:
     """
     Return the value for `key` from config.json.
 
-    - If the config file is missing this will raise ConfigNotFoundError unless
+    - If the config file is missing this will raise FileNotFoundError unless
       a non-None `default` is provided (in which case the default is returned).
     - If the key is not present in the config, `default` is returned.
     """
