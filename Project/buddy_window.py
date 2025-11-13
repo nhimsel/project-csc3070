@@ -9,6 +9,7 @@ anim_dir = "anims"
 
 class ShapedWindow(QWidget):
     chatSignal = Signal()
+    killSignal = Signal()
     cur_anim = "feesh"
 
     def __init__(self, animation):
@@ -98,6 +99,10 @@ class ShapedWindow(QWidget):
                 self.showNormal()
                 self.raise_()
                 self.activateWindow()
+
+    def closeEvent(self, event):
+        self.killSignal.emit()
+        event.accept()
 
     def quit_app(self):
         self.tray_icon.hide()

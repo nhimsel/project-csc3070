@@ -11,6 +11,8 @@ from openai import send_message
 
 
 class ChatWindow(QMainWindow):
+    chat_response = Signal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = Ui_Window()
@@ -33,6 +35,7 @@ class ChatWindow(QMainWindow):
         QThreadPool.globalInstance().start(worker)
 
     def restore_ui(self, response):
+        self.chat_response.emit(response)
         self.ui.textEdit_2.setText(response)
         self.ui.textEdit.clear()
         self.ui.pushButton.setEnabled(True)
@@ -44,9 +47,10 @@ class ChatWindow(QMainWindow):
         return super().eventFilter(obj,event)
 
     def closeEvent(self, event):
-        # minimize to tray instead of quitting
-        event.ignore()
+    #    # minimize to tray instead of quitting
+    #    event.ignore()
         self.hide()
+        event.accept()
 
         # use tray helper to show an optional message
     ## this notification is kinda annoying.
