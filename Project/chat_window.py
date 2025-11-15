@@ -45,12 +45,16 @@ class ChatWindow(QMainWindow):
             if event.key() == Qt.Key.Key_Return and self.ui.textEdit.hasFocus():
                 self.message_send()
         return super().eventFilter(obj,event)
+    
+    def move_then_show(self, x:int, y:int):
+        #x and y are coords of buddy_window
+        self.move(x,y)
+        self.show()
 
     def closeEvent(self, event):
     #    # minimize to tray instead of quitting
-    #    event.ignore()
+        event.ignore()
         self.hide()
-        event.accept()
 
         # use tray helper to show an optional message
     ## this notification is kinda annoying.

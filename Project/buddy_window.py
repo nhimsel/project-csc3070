@@ -11,7 +11,7 @@ source_dir = Path(__file__).parent.resolve()
 anim_dir = source_dir / "anims"
 
 class ShapedWindow(QWidget):
-    chatSignal = Signal()
+    chatSignal = Signal(int, int)
     killSignal = Signal()
     cur_anim = "feesh"
 
@@ -97,7 +97,7 @@ class ShapedWindow(QWidget):
             self.offset = event.pos()
         # send message to open chat on right click
         if event.button() == Qt.RightButton:
-            self.chatSignal.emit()
+            self.chatSignal.emit(self.pos().x(), self.pos().y())
 
 
 

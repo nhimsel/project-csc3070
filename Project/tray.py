@@ -48,6 +48,7 @@ class TrayIcon(QObject):
     def toggle(self):
         if self.window.isVisible():
             self.window.hide()
+            self.window.killSignal.emit()
         else:
             self.show_window()
 
