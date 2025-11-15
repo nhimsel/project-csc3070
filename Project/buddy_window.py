@@ -1,11 +1,14 @@
 import sys
 import os
+from pathlib import Path
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap, QMovie
 from PySide6.QtWidgets import QApplication, QLabel, QWidget, QSystemTrayIcon
 from tray import TrayIcon
 
-anim_dir = "anims"
+# ensure in correct directory
+source_dir = Path(__file__).parent.resolve()
+anim_dir = source_dir / "anims"
 
 class ShapedWindow(QWidget):
     chatSignal = Signal()
