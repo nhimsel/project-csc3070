@@ -2,7 +2,7 @@ import sys
 import os
 from pathlib import Path
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QPixmap, QMovie
+from PySide6.QtGui import QPixmap, QMovie, QGuiApplication
 from PySide6.QtWidgets import QApplication, QLabel, QWidget, QSystemTrayIcon
 from tray import TrayIcon
 
@@ -30,6 +30,19 @@ class ShapedWindow(QWidget):
         self.set_image(image_path)
 
         self.tray = TrayIcon(self)
+
+        self.move_to_bottom_right()
+
+    def move_to_bottom_right(self):
+        # Get desktop widget (screen size)
+        screen_rect = QGuiApplication.primaryScreen().geometry()
+        
+        # Calculate x and y for lower right corner
+        x = screen_rect.right() - self.width()
+        y = screen_rect.bottom() - self.height()
+        
+        # Move the window
+        self.move(x, y)
 
     # --- Load and display a new image or GIF ---
     def set_image(self, image_path):
@@ -72,10 +85,11 @@ class ShapedWindow(QWidget):
             self.resize(pix.size())
 
     def switch_gif(self, animation):
-        anim_name=animation+".gif"
-        image_path=os.path.join(anim_dir, anim_name)
-        self.set_image(image_path)
-        self.cur_anim=animation
+        if (self.cur_anim!=animation):
+            anim_name=animation+".gif"
+            image_path=os.path.join(anim_dir, anim_name)
+            self.set_image(image_path)
+            self.cur_anim=animation
 
     # --- Dragging behavior ---
     def mousePressEvent(self, event):
