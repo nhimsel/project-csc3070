@@ -17,9 +17,17 @@ class ShapedWindow(QWidget):
 
     def __init__(self, animation):
         self.cur_anim=animation
-        anim_name=animation+".gif"
+        if self.cur_anim != "cat":
+            anim_name=animation+".gif"
+        else:
+            anim_name=animation+".png"
         image_path=os.path.join(anim_dir, anim_name)
         super().__init__()
+
+        self.idle_image = anim_dir / "cat.png"      # PNG first frame
+        self.drag_gif   = anim_dir / "cat.gif"      # full GIF animation
+        self.is_dragging = False
+
         self.label = QLabel(self)
         self.label.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
@@ -86,15 +94,23 @@ class ShapedWindow(QWidget):
 
     def switch_gif(self, animation):
         if (self.cur_anim!=animation):
-            anim_name=animation+".gif"
-            image_path=os.path.join(anim_dir, anim_name)
-            self.set_image(image_path)
             self.cur_anim=animation
+            if animation == "cat":
+                self.set_image(str(self.idle_image))
+            else:
+                anim_name=animation+".gif"
+                image_path=os.path.join(anim_dir, anim_name)
+                self.set_image(image_path)
+
 
     # --- Dragging behavior ---
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.offset = event.pos()
+            if self.cur_anim == "cat":
+                self.is_dragging = True
+                self.set_image(str(self.drag_gif))
+
         # send message to open chat on right click
         if event.button() == Qt.RightButton:
             x=self.pos().x()+self.width()
@@ -109,6 +125,9 @@ class ShapedWindow(QWidget):
 
     def mouseReleaseEvent(self, event):
         self.offset = None
+        if self.cur_anim == "cat":
+            self.is_dragging = False
+            self.set_image(str(self.idle_image))
 
     def on_tray_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
