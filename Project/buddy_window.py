@@ -1,7 +1,8 @@
 import sys
 import os
+import time
 from pathlib import Path
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QTimer
 from PySide6.QtGui import QPixmap, QMovie, QGuiApplication
 from PySide6.QtWidgets import QApplication, QLabel, QWidget, QSystemTrayIcon
 from tray import TrayIcon
@@ -41,6 +42,40 @@ class ShapedWindow(QWidget):
 
         self.move_to_bottom_right()
 
+        # --- Gravity variables ---
+        self.vx = 0
+        self.vy = 0
+        self.gravity = 0.9
+        self.friction = 0.8
+        self.is_airborne = False
+
+        # --- Momentum variables ---
+        self.last_drag_x = None
+        self.last_drag_time = None
+
+        # Determine the floor position (screen bottom)
+        screen = QGuiApplication.primaryScreen().geometry()
+        self.floor_y = screen.bottom()
+
+        # Physics timer (60 FPS)
+        self.physics_timer = QTimer()
+        self.physics_timer.timeout.connect(self.update_physics)
+        self.physics_timer.start(16)  # ~60 FPS# --- Gravity variables ---
+        self.vx = 0
+        self.vy = 0
+        self.gravity = 0.9
+        self.friction = 0.8
+        self.is_airborne = False
+
+        # Determine the floor position (screen bottom)
+        screen = QGuiApplication.primaryScreen().geometry()
+        self.floor_y = screen.bottom()
+
+        # Physics timer (60 FPS)
+        self.physics_timer = QTimer()
+        self.physics_timer.timeout.connect(self.update_physics)
+        self.physics_timer.start(16)  # ~60 FPS
+
     def move_to_bottom_right(self):
         # Get desktop widget (screen size)
         screen_rect = QGuiApplication.primaryScreen().geometry()
@@ -51,6 +86,37 @@ class ShapedWindow(QWidget):
         
         # Move the window
         self.move(x, y)
+
+    def update_physics(self):
+        # No gravity while dragging
+        if self.is_dragging:
+            self.vy = 0
+            self.vx = 0
+            return
+
+        x = self.x()
+        y = self.y()
+
+        # Horizontal motion
+        x += self.vx
+        self.vx *= self.friction
+
+        if abs(self.vx) < 0.1:
+            self.vx = 0
+
+        # Vertical motion/apply gravity
+        self.vy += self.gravity
+        new_y = y + self.vy
+
+        # Collision with floor
+        if new_y + self.height() >= self.floor_y:
+            new_y = self.floor_y - self.height()
+            self.vy = 0  # stop falling
+            self.is_airborne = False
+        else:
+            self.is_airborne = True
+
+        self.move(x, new_y)
 
     # --- Load and display a new image or GIF ---
     def set_image(self, image_path):
@@ -107,8 +173,12 @@ class ShapedWindow(QWidget):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.offset = event.pos()
+            self.is_dragging = True
+            self.vx = 0
+            self.vy = 0
+            self.last_drag_x = None   # reset drag tracking
+
             if self.cur_anim == "cat":
-                self.is_dragging = True
                 self.set_image(str(self.drag_gif))
 
         # send message to open chat on right click
@@ -117,17 +187,34 @@ class ShapedWindow(QWidget):
             y=self.pos().y()+self.height()
             self.chatSignal.emit(x,y)
 
-
-
     def mouseMoveEvent(self, event):
         if self.offset and event.buttons() == Qt.LeftButton:
-            self.move(self.pos() + event.pos() - self.offset)
+            new_pos = self.pos() + event.pos() - self.offset
+
+            now = time.time()
+
+            if self.last_drag_x is not None and self.last_drag_time is not None:
+                dx = new_pos.x() - self.last_drag_x
+                dt = now - self.last_drag_time
+
+                if dt > 0:
+                    # Compute REAL velocity (pixels per second)
+                    self.vx = (dx / dt / 60) * 1.5   # 1.5x stronger, divide by ~60 to scale to physics ticks
+
+            # Update previous drag state
+            self.last_drag_x = new_pos.x()
+            self.last_drag_time = now
+
+            self.move(new_pos)
 
     def mouseReleaseEvent(self, event):
         self.offset = None
+        self.is_dragging = False # On release, gravity resumes
+        self.is_airborne = True
+        self.last_drag_x = None  # stop collecting drag data
         if self.cur_anim == "cat":
-            self.is_dragging = False
             self.set_image(str(self.idle_image))
+
 
     def on_tray_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:

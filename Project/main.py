@@ -23,7 +23,7 @@ if __name__ == "__main__":
     videos.found.connect(buddy_win.switch_gif)
     videos.start()
 
-    test_win = MainWindow()
+    test_win = MainWindow(buddy_win)
     test_win.switchGif.connect(buddy_win.switch_gif)
     test_win.show()
 
