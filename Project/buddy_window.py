@@ -46,12 +46,15 @@ class ShapedWindow(QWidget):
         self.vx = 0
         self.vy = 0
         self.gravity = 0.9
-        self.friction = 0.8
+        self.friction = 0.7
         self.is_airborne = False
 
         # --- Momentum variables ---
         self.last_drag_x = None
         self.last_drag_time = None
+        # Velocity history for better throw detection
+        self.drag_history = []  # list of (timestamp, x, y)
+        self.drag_history_window = 0.05  # seconds to look back (~100 ms)
 
         # Determine the floor position (screen bottom)
         screen = QGuiApplication.primaryScreen().geometry()
@@ -87,6 +90,10 @@ class ShapedWindow(QWidget):
         # Move the window
         self.move(x, y)
 
+        self.vx = 0
+        self.vy = 0
+        self.is_airborne = False
+
     def update_physics(self):
         # No gravity while dragging
         if self.is_dragging:
@@ -97,15 +104,24 @@ class ShapedWindow(QWidget):
         x = self.x()
         y = self.y()
 
-        # Horizontal motion
+        # --- Horizontal motion ---
         x += self.vx
-        self.vx *= self.friction
 
-        if abs(self.vx) < 0.1:
+        if self.is_airborne:
+            # gentle drag in air
+            self.vx *= 0.97
+        else:
+            # strong friction on ground
+            self.vx *= 0.80
+
+        # threshold to stop micro-sliding
+        if abs(self.vx) < 0.3:
             self.vx = 0
 
         # Vertical motion/apply gravity
         self.vy += self.gravity
+        # Slight vertical drag so upward throws slow naturally
+        self.vy *= 0.99
         new_y = y + self.vy
 
         # Collision with floor
@@ -193,25 +209,42 @@ class ShapedWindow(QWidget):
 
             now = time.time()
 
-            if self.last_drag_x is not None and self.last_drag_time is not None:
-                dx = new_pos.x() - self.last_drag_x
-                dt = now - self.last_drag_time
+            # Record drag history (t, x, y)
+            self.drag_history.append((now, new_pos.x(), new_pos.y()))
 
-                if dt > 0:
-                    # Compute REAL velocity (pixels per second)
-                    self.vx = (dx / dt / 60) * 1.5   # 1.5x stronger, divide by ~60 to scale to physics ticks
-
-            # Update previous drag state
-            self.last_drag_x = new_pos.x()
-            self.last_drag_time = now
+            # Keep only the last N ms
+            cutoff = now - self.drag_history_window
+            self.drag_history = [(t, x, y) for (t, x, y) in self.drag_history if t >= cutoff]
 
             self.move(new_pos)
 
     def mouseReleaseEvent(self, event):
         self.offset = None
-        self.is_dragging = False # On release, gravity resumes
+        self.is_dragging = False
         self.is_airborne = True
-        self.last_drag_x = None  # stop collecting drag data
+
+        if len(self.drag_history) > 1:
+            t0, x0, y0 = self.drag_history[0]
+            t1, x1, y1 = self.drag_history[-1]
+
+            dx = x1 - x0
+            dy = y1 - y0
+
+            # --- FIX: Only displacement, not velocity spikes ---
+            throw_scale = 0.15   # tweak between 0.1–0.25
+            vx = dx * throw_scale
+            vy = dy * throw_scale
+
+            # --- FIX: Cap velocities to prevent extreme motion ---
+            max_speed = 30
+            vx = max(-max_speed, min(max_speed, vx))
+            vy = max(-max_speed, min(max_speed, vy))
+
+            self.vx = vx
+            self.vy = vy
+
+        self.drag_history.clear()
+
         if self.cur_anim == "cat":
             self.set_image(str(self.idle_image))
 
