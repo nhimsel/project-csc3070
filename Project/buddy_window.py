@@ -3,7 +3,7 @@ import os
 import time
 from pathlib import Path
 from PySide6.QtCore import Qt, Signal, QTimer
-from PySide6.QtGui import QPixmap, QMovie, QGuiApplication, QRegion, QImage, QPainter, QBitmap
+from PySide6.QtGui import QMovie, QGuiApplication
 from PySide6.QtWidgets import QApplication, QLabel, QWidget, QSystemTrayIcon
 from tray import TrayIcon
 
@@ -102,36 +102,50 @@ class ShapedWindow(QWidget):
         # --- Horizontal motion ---
         x += self.vx
 
+        # Bounce off left/right edges
+        screen_geom = QGuiApplication.primaryScreen().geometry()
+        screen_width = screen_geom.width()
+        obj_width = self.width()
+
+        # Hit left edge
+        if x <= 0:
+            x = 0
+            self.vx = -self.vx * 0.8  # bounce with damping
+
+        # Hit right edge
+        elif x + obj_width >= screen_width:
+            x = screen_width - obj_width
+            self.vx = -self.vx * 0.8  # bounce with damping
+
+        # Air friction vs ground friction
         if self.is_airborne:
-            # gentle drag in air
             self.vx *= 0.97
         else:
-            # strong friction on ground
             self.vx *= 0.80
 
         # threshold to stop micro-sliding
         if abs(self.vx) < 0.3:
             self.vx = 0
 
-        # Vertical motion/apply gravity
+        # --- Vertical motion/apply gravity ---
         self.vy += self.gravity
-        # Slight vertical drag so upward throws slow naturally
-        self.vy *= 0.99
+        self.vy *= 0.99  # slight vertical drag
+
         new_y = y + self.vy
 
         # Collision with floor
         if new_y + self.height() >= self.floor_y:
             new_y = self.floor_y - self.height()
-            self.vy = 0  # stop falling
+            self.vy = 0
             self.is_airborne = False
-            print(self.cur_anim)
-            print(self.drag_gif)
+
             if str(self.cur_anim) == str(self.drag_gif):
                 self.switch_gif(self.idle_image)
         else:
             self.is_airborne = True
 
         self.move(x, new_y)
+
 
     # --- Load and display a new image or GIF ---
     def set_image(self, image_path:str):
