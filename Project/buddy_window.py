@@ -35,6 +35,8 @@ class ShapedWindow(QWidget):
 
         self.tray = TrayIcon(self)
 
+        image_path = os.path.join(anim_dir, "talk.gif")
+        self.play_gif_once(image_path)
         self.move_to_bottom_right()
 
         # to randomly have the buddy blink
@@ -213,36 +215,39 @@ class ShapedWindow(QWidget):
             self.set_image(image_path)
 
     def play_gif_once(self, animation: str):
-        """Play a GIF once, then revert to the previous animation."""
-        if self.cur_anim != animation:
-            prev_anim = self.cur_anim
-            image_path = os.path.join(anim_dir, animation)
-            self.cur_anim = image_path
+       """Play a GIF once, then revert to the previous animation."""
+       if self.cur_anim == animation:
+           return
 
-            if self.movie:
-                self.movie.stop()
-                self.movie.deleteLater()
-                self.movie = None
+       prev_anim = self.cur_anim
+       image_path = os.path.join(anim_dir, animation)
+       self.cur_anim = image_path
 
-            self.movie = QMovie(image_path)
-            self.label.setMovie(self.movie)
-            self.movie.frameChanged.connect(self._update_mask)
+       if self.movie:
+           self.movie.stop()
+           self.movie.deleteLater()
+           self.movie = None
 
-            # Stop movie after it finishes one loop
-            self.movie.frameChanged.connect(lambda frame: self._stop_after_one_loop(frame, prev_anim))
+       self.movie = QMovie(image_path)
+       self.movie.setCacheMode(QMovie.CacheAll)
+       self.label.setMovie(self.movie)
+       self.movie.frameChanged.connect(self._update_mask)
 
-            self.movie.setCacheMode(QMovie.CacheAll)
-            self.movie.setPaused(False)
-            self.movie.start()
-            self.cur_anim = prev_anim
+       # Wait until the movie is valid and frame count is known
+       def check_last_frame(frame_number):
+           if self.movie.frameCount() > 0 and frame_number == self.movie.frameCount() - 1:
+               # Stop movie and revert to previous animation
+               self.movie.stop()
+               self.switch_gif(prev_anim)
 
-    def _stop_after_one_loop(self, frame_number, prev_anim):
-        if frame_number == self.movie.frameCount() - 1:  # last frame
-            self.switch_gif(prev_anim)
-
+       self.movie.frameChanged.connect(check_last_frame)
+       self.movie.start()
+ 
+    
     # for exclusive use by blinker. blinks once
     def one_blink(self):
-        if str(self.cur_anim) != str(self.drag_gif):
+        # only send if less important anim
+        if str(self.cur_anim) == str(self.idle_image):
             self.play_gif_once("blink.gif")
     
     # --- Dragging behavior ---
