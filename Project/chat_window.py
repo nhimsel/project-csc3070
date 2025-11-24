@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QMainWindow, QSystemTrayIcon, QApplication
+from PySide6.QtWidgets import QMainWindow, QApplication
 from PySide6.QtCore import QEvent, Qt, QRunnable, Slot, Signal, QThreadPool, QObject
 
 # Important:
@@ -6,7 +6,6 @@ from PySide6.QtCore import QEvent, Qt, QRunnable, Slot, Signal, QThreadPool, QOb
 #     pyside6-uic form.ui -o ui_form.py, or
 #     pyside2-uic form.ui -o ui_form.py
 from ui_form import Ui_Window
-from tray import TrayIcon
 from openai import send_message
 
 
@@ -21,9 +20,6 @@ class ChatWindow(QMainWindow):
         self.setWindowTitle("test")
         self.ui.textEdit.installEventFilter(self)
         self.ui.pushButton.clicked.connect(self.message_send)
-
-        # create tray helper (it will be a no-op if system tray is unavailable)
-        # self.tray = TrayIcon(self)
 
     def message_send(self):
         self.ui.pushButton.setDisabled(True)
@@ -52,28 +48,8 @@ class ChatWindow(QMainWindow):
         self.show()
 
     def closeEvent(self, event):
-    #    # minimize to tray instead of quitting
         event.ignore()
         self.hide()
-
-        # use tray helper to show an optional message
-    ## this notification is kinda annoying.
-        #if getattr(self, "tray", None) and self.tray.is_available:
-        #    self.tray.show_message("test", "Application minimized to tray")
-
-    # def on_tray_activated(self, reason):
-    #     if reason == QSystemTrayIcon.ActivationReason.Trigger:
-    #         if self.isVisible():
-    #             self.hide()
-    #         else:
-    #             self.showNormal()
-    #             self.raise_()
-    #             self.activateWindow()
-
-    def quit_app(self):
-        # hide tray icon before quitting
-        self.tray_icon.hide()
-        QApplication.quit()
 
 class message_worker(QRunnable):
     def __init__(self, input):

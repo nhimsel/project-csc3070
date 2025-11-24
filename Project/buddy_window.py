@@ -35,8 +35,6 @@ class ShapedWindow(QWidget):
 
         self.tray = TrayIcon(self)
 
-        image_path = os.path.join(anim_dir, "talk.gif")
-        self.play_gif_once(image_path)
         self.move_to_bottom_right()
 
         # to randomly have the buddy blink
