@@ -112,7 +112,7 @@ def get_window_title_from_hwnd(hwnd):
 
 def is_video_player(hwnd):
     # List of known processes that typically play videos
-    known_video_processes = ['chrome.exe', 'firefox.exe', 'edge.exe', 'vlc.exe', 'mspmsnsv.dll', 'mpc-hc.exe', 'potplayer.exe']
+    known_video_processes = ['chrome.exe', 'firefox.exe', 'edge.exe', 'vlc.exe', 'mspmsnsv.dll', 'mpc-hc.exe', 'potplayer.exe', 'mpv.exe']
     
     try:
         # Get the process ID of the window
