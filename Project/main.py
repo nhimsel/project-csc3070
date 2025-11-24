@@ -19,7 +19,7 @@ if __name__ == "__main__":
     buddy_win.chatSignal.connect(chat_win.move_then_show)
     buddy_win.killSignal.connect(chat_win.close)
 
-    emotions.swap_signal.connect(buddy_win.switch_gif)
+    emotions.swap_signal.connect(buddy_win.play_gif_once)
     videos.found.connect(buddy_win.switch_gif)
     videos.start()
 

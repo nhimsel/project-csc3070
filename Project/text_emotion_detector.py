@@ -8,6 +8,7 @@ class EmotionHandler(QObject):
 
     def __init__(self):
         super().__init__()
+        # for more info on the model, see https://huggingface.co/michellejieli/emotion_text_classifier
         self.pipe = pipeline("text-classification", model="michellejieli/emotion_text_classifier")
     
     def get_emotion(self, input:str):
@@ -24,6 +25,15 @@ class EmotionHandler(QObject):
                 self.swap_signal.emit("blink.gif")
             case "neutral":
                 self.swap_signal.emit("talk.gif")
+            case "anger":
+                print("give me an anim")
+            case "sadness":
+                print("give me an anim")
+            case "fear":
+                print("give me an anim")
+            case "surprise":
+                print("give me an anim")
+
 
 # alternate implementation using the existing llm infrastructure
 # may need minor modifications, such as signals, to replace the above implementation

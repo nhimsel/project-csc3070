@@ -1,8 +1,8 @@
-import sys
 import os
 import time
+import random
 from pathlib import Path
-from PySide6.QtCore import Qt, Signal, QTimer
+from PySide6.QtCore import Qt, Signal, QTimer, QObject
 from PySide6.QtGui import QMovie, QGuiApplication
 from PySide6.QtWidgets import QApplication, QLabel, QWidget, QSystemTrayIcon
 from tray import TrayIcon
@@ -36,6 +36,11 @@ class ShapedWindow(QWidget):
         self.tray = TrayIcon(self)
 
         self.move_to_bottom_right()
+
+        # to randomly have the buddy blink
+        self.blinker = blink_timer()
+        self.blinker.blinkEmitter.connect(self.one_blink)
+        self.blinker.start()
 
         # --- Gravity variables ---
         self.vx = 0
@@ -146,7 +151,6 @@ class ShapedWindow(QWidget):
 
         self.move(x, new_y)
 
-
     # --- Load and display a new image or GIF ---
     def set_image(self, image_path:str):
         """Switch the displayed image or animation dynamically."""
@@ -201,13 +205,46 @@ class ShapedWindow(QWidget):
         
         DO NOT USE PNG. the mask renderer ain't working right; 
         I can't figure out why
+        single frame gifs are fine tho
         """
         if (self.cur_anim!=animation):
             image_path=os.path.join(anim_dir, animation)
             self.cur_anim=image_path
             self.set_image(image_path)
 
+    def play_gif_once(self, animation: str):
+        """Play a GIF once, then revert to the previous animation."""
+        if self.cur_anim != animation:
+            prev_anim = self.cur_anim
+            image_path = os.path.join(anim_dir, animation)
+            self.cur_anim = image_path
 
+            if self.movie:
+                self.movie.stop()
+                self.movie.deleteLater()
+                self.movie = None
+
+            self.movie = QMovie(image_path)
+            self.label.setMovie(self.movie)
+            self.movie.frameChanged.connect(self._update_mask)
+
+            # Stop movie after it finishes one loop
+            self.movie.frameChanged.connect(lambda frame: self._stop_after_one_loop(frame, prev_anim))
+
+            self.movie.setCacheMode(QMovie.CacheAll)
+            self.movie.setPaused(False)
+            self.movie.start()
+            self.cur_anim = prev_anim
+
+    def _stop_after_one_loop(self, frame_number, prev_anim):
+        if frame_number == self.movie.frameCount() - 1:  # last frame
+            self.switch_gif(prev_anim)
+
+    # for exclusive use by blinker. blinks once
+    def one_blink(self):
+        if str(self.cur_anim) != str(self.drag_gif):
+            self.play_gif_once("blink.gif")
+    
     # --- Dragging behavior ---
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -216,6 +253,7 @@ class ShapedWindow(QWidget):
             self.vx = 0
             self.vy = 0
             self.last_drag_x = None   # reset drag tracking
+            self.cur_anim = self.drag_gif
             self.switch_gif(str(self.drag_gif))
 
         # send message to open chat on right click
@@ -289,3 +327,21 @@ class ShapedWindow(QWidget):
     def quit_app(self):
         self.tray_icon.hide()
         QApplication.quit()
+
+class blink_timer(QObject):
+    blinkEmitter = Signal()
+    def __init__(self):
+        super().__init__()
+
+        self.blink_timer = QTimer()
+        self.blink_timer.setSingleShot(True)
+        self.blink_timer.timeout.connect(self.on_timeout)
+    def start(self):
+        self.schedule_time_random()
+    def schedule_time_random(self):
+        # time between 5s and 2m
+        time = random.randint(5*1000, 2*60*1000)
+        self.blink_timer.start(time)
+    def on_timeout(self):
+        self.blinkEmitter.emit()
+        self.schedule_time_random()
