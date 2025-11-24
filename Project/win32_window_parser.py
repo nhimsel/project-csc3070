@@ -19,11 +19,11 @@ class VideoScanner(QThread):
             title = find_video_players()
             if title:
                 #self.found.emit(title)
-                self.found.emit("feesh")
+                self.found.emit("wave.gif")
             """
             else:
                 #self.found.emit("null")
-                self.found.emit("feesh-2")
+                self.found.emit("default.png")
             """
             self.sleep(2)
 

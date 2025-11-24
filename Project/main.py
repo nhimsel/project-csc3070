@@ -15,7 +15,7 @@ if __name__ == "__main__":
     chat_win = ChatWindow()
     chat_win.chat_response.connect(emotions.get_emotion)
 
-    buddy_win = ShapedWindow("cat")
+    buddy_win = ShapedWindow()
     buddy_win.chatSignal.connect(chat_win.move_then_show)
     buddy_win.killSignal.connect(chat_win.close)
 

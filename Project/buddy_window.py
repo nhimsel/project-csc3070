@@ -3,7 +3,7 @@ import os
 import time
 from pathlib import Path
 from PySide6.QtCore import Qt, Signal, QTimer
-from PySide6.QtGui import QPixmap, QMovie, QGuiApplication
+from PySide6.QtGui import QPixmap, QMovie, QGuiApplication, QRegion, QImage, QPainter, QBitmap
 from PySide6.QtWidgets import QApplication, QLabel, QWidget, QSystemTrayIcon
 from tray import TrayIcon
 
@@ -14,19 +14,14 @@ anim_dir = source_dir / "anims"
 class ShapedWindow(QWidget):
     chatSignal = Signal(int, int)
     killSignal = Signal()
-    cur_anim = "feesh"
+    cur_anim = anim_dir / "default.gif"
 
-    def __init__(self, animation):
-        self.cur_anim=animation
-        if self.cur_anim != "cat":
-            anim_name=animation+".gif"
-        else:
-            anim_name=animation+".png"
-        image_path=os.path.join(anim_dir, anim_name)
+    def __init__(self):
+        image_path=os.path.join(anim_dir, self.cur_anim)
         super().__init__()
 
-        self.idle_image = anim_dir / "cat.png"      # PNG first frame
-        self.drag_gif   = anim_dir / "cat.gif"      # full GIF animation
+        self.idle_image = anim_dir / "default.gif"
+        self.drag_gif   = anim_dir / "CrazyThrow.gif"
         self.is_dragging = False
 
         self.label = QLabel(self)
@@ -36,7 +31,7 @@ class ShapedWindow(QWidget):
         self.offset = None
 
         self.movie = None
-        self.set_image(image_path)
+        self.switch_gif(str(image_path))
 
         self.tray = TrayIcon(self)
 
@@ -129,16 +124,20 @@ class ShapedWindow(QWidget):
             new_y = self.floor_y - self.height()
             self.vy = 0  # stop falling
             self.is_airborne = False
+            print(self.cur_anim)
+            print(self.drag_gif)
+            if str(self.cur_anim) == str(self.drag_gif):
+                self.switch_gif(self.idle_image)
         else:
             self.is_airborne = True
 
         self.move(x, new_y)
 
     # --- Load and display a new image or GIF ---
-    def set_image(self, image_path):
+    def set_image(self, image_path:str):
         """Switch the displayed image or animation dynamically."""
-        self.image_path = image_path
-        is_gif = image_path.lower().endswith(".gif")
+        self.image_path = str(image_path)
+        #is_gif = str(image_path).lower().endswith(".gif")
 
         # Stop previous movie if it exists
         if self.movie:
@@ -146,19 +145,25 @@ class ShapedWindow(QWidget):
             self.movie.deleteLater()
             self.movie = None
 
-        if is_gif:
-            self._init_gif()
+        #if is_gif:
+        self._init_gif()
+        """
         else:
             self._init_static()
+        """
 
+    """
     def _init_static(self):
         pixmap = QPixmap(self.image_path)
         self.label.setPixmap(pixmap)
+        region = self.alpha_region_from_pixmap(pixmap)
+        self.setMask(region)
         self.label.setMask(pixmap.mask())
         self.resize(pixmap.size())
+    """
 
     def _init_gif(self):
-        self.movie = QMovie(self.image_path)
+        self.movie = QMovie(str(self.image_path))
         self.label.setMovie(self.movie)
         self.movie.frameChanged.connect(self._update_mask)
         self.movie.start()
@@ -174,15 +179,19 @@ class ShapedWindow(QWidget):
             self.label.setMask(pix.mask())
             self.resize(pix.size())
 
-    def switch_gif(self, animation):
+    def switch_gif(self, animation:str):
+        """
+        this has been refactored and usage has changed.
+        animation must now include the file extension
+        ex "default.gif" instead of "default"
+        
+        DO NOT USE PNG. the mask renderer ain't working right; 
+        I can't figure out why
+        """
         if (self.cur_anim!=animation):
-            self.cur_anim=animation
-            if animation == "cat":
-                self.set_image(str(self.idle_image))
-            else:
-                anim_name=animation+".gif"
-                image_path=os.path.join(anim_dir, anim_name)
-                self.set_image(image_path)
+            image_path=os.path.join(anim_dir, animation)
+            self.cur_anim=image_path
+            self.set_image(image_path)
 
 
     # --- Dragging behavior ---
@@ -193,9 +202,7 @@ class ShapedWindow(QWidget):
             self.vx = 0
             self.vy = 0
             self.last_drag_x = None   # reset drag tracking
-
-            if self.cur_anim == "cat":
-                self.set_image(str(self.drag_gif))
+            self.switch_gif(str(self.drag_gif))
 
         # send message to open chat on right click
         if event.button() == Qt.RightButton:
@@ -245,9 +252,12 @@ class ShapedWindow(QWidget):
 
         self.drag_history.clear()
 
-        if self.cur_anim == "cat":
+        """
+        if self.cur_anim == self.drag_gif:
             self.set_image(str(self.idle_image))
-
+        """
+        # instead use physics func to wait until buddy lands to switch
+        # self.set_image(self.idle_image)        
 
     def on_tray_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:

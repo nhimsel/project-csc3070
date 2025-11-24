@@ -1,0 +1,6 @@
+gifs need to be resized, as they are rendered at full size.
+here is the ffmpeg command I used
+
+ffmpeg -i image.gif -filter_complex 'scale=400:300:force_original_aspect_ratio=decrease,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse' resized_image.gif
+
+where image is the gif you want to shrink

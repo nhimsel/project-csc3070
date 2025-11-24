@@ -19,11 +19,11 @@ class EmotionHandler(QObject):
         match emotion:
             # extrapolate on this later, just for testing. 
             case "joy":
-                self.swap_signal.emit("feesh")
+                self.swap_signal.emit("smile.gif")
             case "disgust":
-                self.swap_signal.emit("feesh-2")
+                self.swap_signal.emit("blink.gif")
             case "neutral":
-                self.swap_signal.emit("cat")
+                self.swap_signal.emit("talk.gif")
 
 # alternate implementation using the existing llm infrastructure
 # may need minor modifications, such as signals, to replace the above implementation
