@@ -261,8 +261,8 @@ class ShapedWindow(QWidget):
 
         # send message to open chat on right click
         if event.button() == Qt.RightButton:
-            x=self.pos().x()+self.width()
-            y=self.pos().y()+self.height()
+            x=self.pos().x()+int(self.width()/2)
+            y=self.pos().y()+int(self.height()/2)
             self.chatSignal.emit(x,y)
 
     def mouseMoveEvent(self, event):
