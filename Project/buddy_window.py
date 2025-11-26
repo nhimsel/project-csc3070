@@ -21,7 +21,9 @@ class ShapedWindow(QWidget):
         super().__init__()
 
         self.idle_image = anim_dir / "default.gif"
-        self.drag_gif   = anim_dir / "CrazyThrow.gif"
+        self.drag_gif   = anim_dir / "blink.gif"
+        self.throw_gif   = anim_dir / "CrazyThrow.gif"
+
         self.is_dragging = False
 
         self.label = QLabel(self)
@@ -42,14 +44,14 @@ class ShapedWindow(QWidget):
         self.blinker.blinkEmitter.connect(self.one_blink)
         self.blinker.start()
 
-        # --- Gravity variables ---
+        # gravity variables
         self.vx = 0
         self.vy = 0
         self.gravity = 0.9
         self.friction = 0.7
         self.is_airborne = False
 
-        # --- Momentum variables ---
+        # momentum variables
         self.last_drag_x = None
         self.last_drag_time = None
         # Velocity history for better throw detection
@@ -93,6 +95,30 @@ class ShapedWindow(QWidget):
         self.vx = 0
         self.vy = 0
         self.is_airborne = False
+
+    # after a throw, wait a second before walking back to base spot
+    # implementing the same methods as move_to_bottom_right
+    def walk_to_bottom_right(self):
+        screen_rect = QGuiApplication.primaryScreen().geometry()
+        self.target_x = screen_rect.right() - self.width()
+        self.target_y = screen_rect.bottom() - self.height()
+
+        self.vx = 2
+        self.vy = 0
+
+        self.walk_timer = QTimer()
+        self.walk_timer.timeout.connect(lambda: self.update_walk(self.target_x, self.vx))
+        self.walk_timer.start(16)
+
+    def update_walk(self, target_x, vx):
+        self.move(self.x() + self.vx, self.y())
+        if int(self.x()) >= self.target_x:
+            self.vx = 0
+            self.walk_timer.stop()
+            self.move(self.target_x, self.y())
+            self.is_walking = False  # reset flag
+            print("I'm done!")
+
 
     def update_physics(self):
         # No gravity while dragging
@@ -144,8 +170,11 @@ class ShapedWindow(QWidget):
             self.vy = 0
             self.is_airborne = False
 
-            if str(self.cur_anim) == str(self.drag_gif):
+            if str(self.cur_anim) == str(self.throw_gif):
                 self.switch_gif(self.idle_image)
+
+            self.walk_to_bottom_right()
+
         else:
             self.is_airborne = True
 
@@ -284,6 +313,8 @@ class ShapedWindow(QWidget):
         self.offset = None
         self.is_dragging = False
         self.is_airborne = True
+        self.cur_anim = self.throw_gif
+        self.switch_gif(str(self.throw_gif))
 
         if len(self.drag_history) > 1:
             t0, x0, y0 = self.drag_history[0]
@@ -342,8 +373,8 @@ class blink_timer(QObject):
     def start(self):
         self.schedule_time_random()
     def schedule_time_random(self):
-        # time between 5s and 2m
-        time = random.randint(5*1000, 2*60*1000)
+        # time between 10s and 20m
+        time = random.randint(10*1000, 20*1000)
         self.blink_timer.start(time)
     def on_timeout(self):
         self.blinkEmitter.emit()

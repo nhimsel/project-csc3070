@@ -2,4 +2,4 @@
 name = "PySide Widgets Project"
 
 [tool.pyside6-project]
-files = ["openai.py", "test_window.py", "config.py", "main.py", "tray.py", "buddy_window.py", "chat_window.py", "form.ui", "text_emotion_detector.py"]
+files = ["openai.py", "test_window.py", "config.py", "main.py", "tray.py", "buddy_window.py", "chat_window.py", "form.ui", "text_emotion_detector.py", "ui_form.py", "win32_window_parser.py"]
