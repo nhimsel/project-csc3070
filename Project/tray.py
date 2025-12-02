@@ -1,4 +1,5 @@
-from PySide6.QtCore import QObject
+import os
+from PySide6.QtCore import QObject, QTimer
 from PySide6.QtWidgets import (
     QApplication,
     QSystemTrayIcon,
@@ -58,9 +59,28 @@ class TrayIcon(QObject):
         self.window.activateWindow()
 
     def quit(self):
+        # Hide the tray icon immediately
         if self.tray:
-            self.tray.hide()
-        QApplication.quit()
+            try:
+                self.tray.hide()
+            except Exception:
+                pass
+
+        # First attempt a graceful Qt shutdown
+        try:
+            QApplication.quit()
+        except Exception:
+            pass
+
+        # Ensure the whole Python process is terminated (kills all threads).
+        # Use a short single-shot timer to give Qt a moment to process quit
+        # before forcing the exit. os._exit exits immediately without cleanup,
+        # which is desired here to guarantee termination of all threads.
+        try:
+            QTimer.singleShot(250, lambda: os._exit(0))
+        except Exception:
+            # As a very last resort, call os._exit synchronously
+            os._exit(0)
 
     def show_message(self, title, text):
         if self.tray:
