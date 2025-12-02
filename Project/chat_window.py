@@ -47,6 +47,10 @@ class ChatWindow(QMainWindow):
         self.move(x-self.width(),y-self.height())
         self.show()
 
+    def move_no_show(self, x:int, y:int):
+        #x and y are coords of buddy_window
+        self.move(x-self.width(),y-self.height())
+
     def closeEvent(self, event):
         event.ignore()
         self.hide()

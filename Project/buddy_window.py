@@ -12,7 +12,8 @@ source_dir = Path(__file__).parent.resolve()
 anim_dir = source_dir / "anims"
 
 class ShapedWindow(QWidget):
-    chatSignal = Signal(int, int)
+    chatSignalShow = Signal(int, int)
+    chatSignalMove = Signal(int, int)
     killSignal = Signal()
     cur_anim = anim_dir / "default.gif"
 
@@ -91,6 +92,8 @@ class ShapedWindow(QWidget):
         
         # Move the window
         self.move(x, y)
+        # move chat window with buddy
+        self.emit_pos(False)
 
         self.vx = 0
         self.vy = 0
@@ -106,6 +109,11 @@ class ShapedWindow(QWidget):
         self.vx = 2
         self.vy = 0
 
+        if (self.target_x > self.x()):
+            # move chat window with buddy
+            self.emit_pos(False)
+            self.is_walking=True
+
         self.walk_timer = QTimer()
         self.walk_timer.timeout.connect(lambda: self.update_walk(self.target_x, self.vx))
         self.walk_timer.start(16)
@@ -117,8 +125,6 @@ class ShapedWindow(QWidget):
             self.walk_timer.stop()
             self.move(self.target_x, self.y())
             self.is_walking = False  # reset flag
-            print("I'm done!")
-
 
     def update_physics(self):
         # No gravity while dragging
@@ -177,6 +183,10 @@ class ShapedWindow(QWidget):
 
         else:
             self.is_airborne = True
+
+        if (self.is_airborne==True):
+            # don't show chat window
+            self.killSignal.emit()
 
         self.move(x, new_y)
 
@@ -290,9 +300,16 @@ class ShapedWindow(QWidget):
 
         # send message to open chat on right click
         if event.button() == Qt.RightButton:
-            x=self.pos().x()+int(self.width()/2)
-            y=self.pos().y()+int(self.height()/2)
-            self.chatSignal.emit(x,y)
+            # spawm chat window relative to buddy
+            self.emit_pos(True)
+            
+    def emit_pos(self, show:bool):
+        x=self.pos().x()+int(self.width()/2)
+        y=self.pos().y()+int(self.height()/2)
+        if show:
+            self.chatSignalShow.emit(x,y)
+        else:
+            self.chatSignalMove.emit(x,y)
 
     def mouseMoveEvent(self, event):
         if self.offset and event.buttons() == Qt.LeftButton:
@@ -308,6 +325,8 @@ class ShapedWindow(QWidget):
             self.drag_history = [(t, x, y) for (t, x, y) in self.drag_history if t >= cutoff]
 
             self.move(new_pos)
+            # move chat window with buddy
+            self.emit_pos(False)
 
     def mouseReleaseEvent(self, event):
         self.offset = None
@@ -359,7 +378,7 @@ class ShapedWindow(QWidget):
         event.accept()
 
     def quit_app(self):
-        self.tray_icon.hide()
+        self.tray.quit()
         QApplication.quit()
 
 class blink_timer(QObject):

@@ -16,7 +16,8 @@ if __name__ == "__main__":
     chat_win.chat_response.connect(emotions.get_emotion)
 
     buddy_win = ShapedWindow()
-    buddy_win.chatSignal.connect(chat_win.move_then_show)
+    buddy_win.chatSignalMove.connect(chat_win.move_no_show)
+    buddy_win.chatSignalShow.connect(chat_win.move_then_show)
     buddy_win.killSignal.connect(chat_win.close)
 
     emotions.swap_signal.connect(buddy_win.play_gif_once)
