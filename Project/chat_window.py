@@ -18,12 +18,12 @@ class ChatWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.setWindowTitle("test")
-        self.ui.textEdit.installEventFilter(self)
+        self.ui.textEdit_input.installEventFilter(self)
         self.ui.pushButton.clicked.connect(self.message_send)
 
     def message_send(self):
         self.ui.pushButton.setDisabled(True)
-        input=self.ui.textEdit.toPlainText()
+        input=self.ui.textEdit_input.toPlainText()
         #send_message(input, self.ui.textEdit_2)
         #self.ui.textEdit_2.setText(send_message(input))
         worker = message_worker(input)
@@ -32,13 +32,13 @@ class ChatWindow(QMainWindow):
 
     def restore_ui(self, response):
         self.chat_response.emit(response)
-        self.ui.textEdit_2.setText(response)
-        self.ui.textEdit.clear()
+        self.ui.textEdit_output.setText(response)
+        self.ui.textEdit_input.clear()
         self.ui.pushButton.setEnabled(True)
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.Type.KeyPress and obj is self.ui.textEdit:
-            if event.key() == Qt.Key.Key_Return and self.ui.textEdit.hasFocus():
+        if event.type() == QEvent.Type.KeyPress and obj is self.ui.textEdit_input:
+            if event.key() == Qt.Key.Key_Return and self.ui.textEdit_input.hasFocus():
                 self.message_send()
         return super().eventFilter(obj,event)
     
