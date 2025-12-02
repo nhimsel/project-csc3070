@@ -17,7 +17,7 @@ class ChatWindow(QMainWindow):
         self.ui = Ui_Window()
         self.ui.setupUi(self)
 
-        self.setWindowTitle("test")
+        self.setWindowTitle("chat")
         self.ui.textEdit_input.installEventFilter(self)
         self.ui.pushButton.clicked.connect(self.message_send)
 
