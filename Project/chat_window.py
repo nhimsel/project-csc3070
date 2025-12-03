@@ -67,7 +67,7 @@ class ChatWindow(QMainWindow):
                     float: right;
                     display: block;
                     text-align: right;
-                    background-color: #E3F2FD;
+                    /*background-color: #E3F2FD;*/
                     color: #000;
                     padding: 10px 14px;
                     border-radius: 12px;
@@ -79,7 +79,7 @@ class ChatWindow(QMainWindow):
                     float: left;
                     display: block;
                     text-align: left;
-                    background-color: #F5F5F5;
+                    /*background-color: #F5F5F5;*/
                     color: #000;
                     padding: 10px 14px;
                     border-radius: 12px;
