@@ -52,37 +52,67 @@ class ChatWindow(QMainWindow):
         return super().eventFilter(obj,event)
     
     def display_conversation(self):
-        """Display conversation with ChatGPT-style formatting"""
-        html_content = '<html><body style="font-family: Arial, sans-serif; margin: 0; padding: 10px;">'
-        
+        """Display conversation with chat-style left/right bubbles that work in QTextBrowser"""
+
+        html = """
+        <html>
+        <head>
+            <style>
+                .msg-container {
+                    width: 100%;
+                    margin: 6px 0;
+                    overflow: auto; /* ensures float clears correctly */
+                }
+                .user-bubble {
+                    float: right;
+                    display: block;
+                    text-align: right;
+                    background-color: #E3F2FD;
+                    color: #000;
+                    padding: 10px 14px;
+                    border-radius: 12px;
+                    max-width: 70%;
+                    word-wrap: break-word;
+                    margin-left: 40%;
+                }
+                .bot-bubble {
+                    float: left;
+                    display: block;
+                    text-align: left;
+                    background-color: #F5F5F5;
+                    color: #000;
+                    padding: 10px 14px;
+                    border-radius: 12px;
+                    max-width: 70%;
+                    word-wrap: break-word;
+                    margin-right: 40%;
+                }
+            </style>
+        </head>
+        <body style="font-family: Arial; padding: 10px;">
+        """
+
         for role, message in self.conversation_history:
             if role == "user":
-                # User message: left-aligned, light blue background
-                html_content += f'''
-                <div style="margin: 8px 0; display: flex; justify-content: flex-end;">
-                    <div style="background-color: #E3F2FD; color: #000; padding: 10px 14px; 
-                                border-radius: 12px; max-width: 70%; word-wrap: break-word;">
-                        {message}
-                    </div>
+                html += f"""
+                <div class="msg-container">
+                    <div class="user-bubble">{message}</div>
                 </div>
-                '''
+                """
             else:
-                # Bot message: right-aligned, light gray background
-                html_content += f'''
-                <div style="margin: 8px 0; display: flex; justify-content: flex-start;">
-                    <div style="background-color: #F5F5F5; color: #000; padding: 10px 14px; 
-                                border-radius: 12px; max-width: 70%; word-wrap: break-word;">
-                        {message}
-                    </div>
+                html += f"""
+                <div class="msg-container">
+                    <div class="bot-bubble">{message}</div>
                 </div>
-                '''
-        
-        html_content += '</body></html>'
-        self.ui.textBrowser_conversation.setHtml(html_content)
-        
+                """
+
+        html += "</body></html>"
+
+        self.ui.textBrowser_conversation.setHtml(html)
+
         # Scroll to bottom
-        scrollbar = self.ui.textBrowser_conversation.verticalScrollBar()
-        scrollbar.setValue(scrollbar.maximum())
+        sb = self.ui.textBrowser_conversation.verticalScrollBar()
+        sb.setValue(sb.maximum())
 
     
     def move_then_show(self, x:int, y:int):
