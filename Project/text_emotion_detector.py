@@ -1,18 +1,64 @@
 # Use a pipeline as a high-level helper
 from transformers import pipeline
 from PySide6.QtCore import Signal, QObject
+import threading
 
 # if this is not modular enough, consider replacing with a custom call to a general LLM
 class EmotionHandler(QObject):
     swap_signal = Signal(str)
 
-    def __init__(self):
+    def __init__(self, async_load: bool = True):
+        """
+        If `async_load` is True (default) the heavy model/pipeline is loaded
+        in a background thread so constructing this object doesn't block the UI.
+        Calls to `get_emotion` before the pipeline is ready are queued and
+        processed once loading completes.
+        """
         super().__init__()
+        self.pipe = None
+        self._queue: list[str] = []
+        self._loading = False
+
+        if async_load:
+            self._start_loading()
+        else:
+            self._load_pipeline()
+
+    def _start_loading(self):
+        if self._loading:
+            return
+        self._loading = True
+        thread = threading.Thread(target=self._load_pipeline, daemon=True)
+        thread.start()
+
+    def _load_pipeline(self):
         # for more info on the model, see https://huggingface.co/michellejieli/emotion_text_classifier
-        self.pipe = pipeline("text-classification", model="michellejieli/emotion_text_classifier")
-    
-    def get_emotion(self, input:str):
-        output=self.pipe(input)
+        try:
+            self.pipe = pipeline("text-classification", model="michellejieli/emotion_text_classifier")
+        finally:
+            self._loading = False
+            # process any queued inputs
+            self._process_queue()
+
+    def _process_queue(self):
+        if not self._queue:
+            return
+        queued = list(self._queue)
+        self._queue.clear()
+        for text in queued:
+            # now that the pipeline exists, perform the analysis
+            try:
+                self.get_emotion(text)
+            except Exception:
+                # keep queue processing robust; ignore problematic inputs
+                pass
+
+    def get_emotion(self, input: str):
+        # If the pipeline isn't ready yet, queue the input and return quickly.
+        if self.pipe is None:
+            self._queue.append(input)
+            return
+        output = self.pipe(input)
         self.swapper(output[0]["label"])
     
     def swapper(self, emotion:str):
