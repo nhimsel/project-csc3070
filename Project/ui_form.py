@@ -16,8 +16,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMainWindow,
-    QPushButton, QSizePolicy, QSpacerItem, QStatusBar,
-    QTextEdit, QVBoxLayout, QWidget)
+    QPushButton, QSizePolicy, QStatusBar, QTextEdit,
+    QVBoxLayout, QWidget)
 
 class Ui_Window(object):
     def setupUi(self, Window):
@@ -52,26 +52,24 @@ class Ui_Window(object):
         self.inputRow.setObjectName(u"inputRow")
         self.textEdit_input = QTextEdit(self.centralwidget)
         self.textEdit_input.setObjectName(u"textEdit_input")
-        self.textEdit_input.setMinimumSize(QSize(0, 80))
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.textEdit_input.sizePolicy().hasHeightForWidth())
+        self.textEdit_input.setSizePolicy(sizePolicy1)
+        self.textEdit_input.setMinimumSize(QSize(0, 48))
+        self.textEdit_input.setMaximumSize(QSize(16777215, 48))
 
         self.inputRow.addWidget(self.textEdit_input)
 
         self.sendColumn = QVBoxLayout()
         self.sendColumn.setSpacing(6)
         self.sendColumn.setObjectName(u"sendColumn")
-        self.verticalSpacerTop = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
-        self.sendColumn.addItem(self.verticalSpacerTop)
-
         self.pushButton = QPushButton(self.centralwidget)
         self.pushButton.setObjectName(u"pushButton")
         self.pushButton.setMinimumSize(QSize(40, 40))
 
         self.sendColumn.addWidget(self.pushButton)
-
-        self.verticalSpacerBottom = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-
-        self.sendColumn.addItem(self.verticalSpacerBottom)
 
 
         self.inputRow.addLayout(self.sendColumn)
