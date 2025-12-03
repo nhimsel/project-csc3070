@@ -23,7 +23,7 @@ class TrayIcon(QObject):
         self.tray = QSystemTrayIcon(self.window)
         icon = self.window.style().standardIcon(QStyle.SP_ComputerIcon)
         self.tray.setIcon(icon)
-        self.tray.setToolTip(self.window.windowTitle() or "Application")
+        self.tray.setToolTip(self.window.windowTitle() or "Buddy")
 
         menu = QMenu(self.window)
         restore = QAction("Restore", self.window)
