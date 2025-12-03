@@ -15,9 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMainWindow,
-    QPushButton, QSizePolicy, QStatusBar, QTextBrowser,
-    QTextEdit, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QHBoxLayout, QMainWindow, QPushButton,
+    QSizePolicy, QStatusBar, QTextBrowser, QTextEdit,
+    QVBoxLayout, QWidget)
 
 class Ui_Window(object):
     def setupUi(self, Window):
@@ -30,13 +30,6 @@ class Ui_Window(object):
         self.verticalLayout.setSpacing(10)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(5, 5, 5, 5)
-        self.header = QLabel(self.centralwidget)
-        self.header.setObjectName(u"header")
-        self.header.setMinimumSize(QSize(0, 36))
-        self.header.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.verticalLayout.addWidget(self.header)
-
         self.textBrowser_conversation = QTextBrowser(self.centralwidget)
         self.textBrowser_conversation.setObjectName(u"textBrowser_conversation")
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -90,7 +83,6 @@ class Ui_Window(object):
 
     def retranslateUi(self, Window):
         Window.setWindowTitle(QCoreApplication.translate("Window", u"Chat", None))
-        self.header.setText(QCoreApplication.translate("Window", u"Chat", None))
         self.textEdit_input.setPlaceholderText(QCoreApplication.translate("Window", u"Type your message here...", None))
         self.pushButton.setText(QCoreApplication.translate("Window", u"Send", None))
     # retranslateUi
