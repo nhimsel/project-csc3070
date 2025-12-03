@@ -18,7 +18,15 @@ headers = {
     "Content-Type": "application/json"
 }
 
-history = []
+history = [
+    # initialize system prompt; define assistant behaviour
+    {
+        "role": "system",
+        "content": (
+            ""
+        )
+    }
+]
 
 def _show_error(output_line_edit, msg):
     try:
