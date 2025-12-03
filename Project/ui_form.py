@@ -16,19 +16,20 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMainWindow,
-    QPushButton, QSizePolicy, QStatusBar, QTextEdit,
-    QVBoxLayout, QWidget)
+    QPushButton, QSizePolicy, QStatusBar, QTextBrowser,
+    QTextEdit, QVBoxLayout, QWidget)
 
 class Ui_Window(object):
     def setupUi(self, Window):
         if not Window.objectName():
             Window.setObjectName(u"Window")
-        Window.resize(300, 350)
+        Window.resize(400, 500)
         self.centralwidget = QWidget(Window)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
         self.verticalLayout.setSpacing(10)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(5, 5, 5, 5)
         self.header = QLabel(self.centralwidget)
         self.header.setObjectName(u"header")
         self.header.setMinimumSize(QSize(0, 36))
@@ -36,16 +37,16 @@ class Ui_Window(object):
 
         self.verticalLayout.addWidget(self.header)
 
-        self.textEdit_output = QTextEdit(self.centralwidget)
-        self.textEdit_output.setObjectName(u"textEdit_output")
+        self.textBrowser_conversation = QTextBrowser(self.centralwidget)
+        self.textBrowser_conversation.setObjectName(u"textBrowser_conversation")
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.textEdit_output.sizePolicy().hasHeightForWidth())
-        self.textEdit_output.setSizePolicy(sizePolicy)
-        self.textEdit_output.setReadOnly(True)
+        sizePolicy.setVerticalStretch(1)
+        sizePolicy.setHeightForWidth(self.textBrowser_conversation.sizePolicy().hasHeightForWidth())
+        self.textBrowser_conversation.setSizePolicy(sizePolicy)
+        self.textBrowser_conversation.setMinimumSize(QSize(0, 0))
 
-        self.verticalLayout.addWidget(self.textEdit_output)
+        self.verticalLayout.addWidget(self.textBrowser_conversation)
 
         self.inputRow = QHBoxLayout()
         self.inputRow.setSpacing(8)
@@ -58,7 +59,7 @@ class Ui_Window(object):
         sizePolicy1.setHeightForWidth(self.textEdit_input.sizePolicy().hasHeightForWidth())
         self.textEdit_input.setSizePolicy(sizePolicy1)
         self.textEdit_input.setMinimumSize(QSize(0, 48))
-        self.textEdit_input.setMaximumSize(QSize(16777215, 48))
+        self.textEdit_input.setMaximumSize(QSize(16777215, 80))
 
         self.inputRow.addWidget(self.textEdit_input)
 
@@ -90,7 +91,6 @@ class Ui_Window(object):
     def retranslateUi(self, Window):
         Window.setWindowTitle(QCoreApplication.translate("Window", u"Chat", None))
         self.header.setText(QCoreApplication.translate("Window", u"Chat", None))
-        self.textEdit_output.setPlaceholderText(QCoreApplication.translate("Window", u"Buddy response...", None))
         self.textEdit_input.setPlaceholderText(QCoreApplication.translate("Window", u"Type your message here...", None))
         self.pushButton.setText(QCoreApplication.translate("Window", u"Send", None))
     # retranslateUi

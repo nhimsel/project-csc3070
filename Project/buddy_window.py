@@ -304,7 +304,7 @@ class ShapedWindow(QWidget):
             self.emit_pos(True)
             
     def emit_pos(self, show:bool):
-        x=self.pos().x()+int(self.width()/2)
+        x=self.pos().x()+int(self.width()/4)
         y=self.pos().y()+int(self.height()/2)
         if show:
             self.chatSignalShow.emit(x,y)

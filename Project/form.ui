@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
-    <height>350</height>
+    <width>400</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,6 +17,18 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
      <number>10</number>
+    </property>
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
+    <property name="topMargin">
+     <number>5</number>
+    </property>
+    <property name="rightMargin">
+     <number>5</number>
+    </property>
+    <property name="bottomMargin">
+     <number>5</number>
     </property>
     <item>
      <widget class="QLabel" name="header">
@@ -35,18 +47,18 @@
      </widget>
     </item>
     <item>
-     <widget class="QTextEdit" name="textEdit_output">
+     <widget class="QTextBrowser" name="textBrowser_conversation">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
+        <verstretch>1</verstretch>
        </sizepolicy>
       </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-      <property name="placeholderText">
-       <string>Buddy response...</string>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
       </property>
      </widget>
     </item>
@@ -72,7 +84,7 @@
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>48</height>
+          <height>80</height>
          </size>
         </property>
         <property name="placeholderText">

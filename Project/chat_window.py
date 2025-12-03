@@ -20,20 +20,29 @@ class ChatWindow(QMainWindow):
         self.setWindowTitle("chat")
         self.ui.textEdit_input.installEventFilter(self)
         self.ui.pushButton.clicked.connect(self.message_send)
+        self.conversation_history = []  # Store conversation history
 
     def message_send(self):
         self.ui.pushButton.setDisabled(True)
-        input=self.ui.textEdit_input.toPlainText()
-        #send_message(input, self.ui.textEdit_2)
-        #self.ui.textEdit_2.setText(send_message(input))
-        worker = message_worker(input)
+        user_input = self.ui.textEdit_input.toPlainText()
+        
+        # Add user message to history and display
+        self.conversation_history.append(("user", user_input))
+        self.display_conversation()
+        self.ui.textEdit_input.clear()
+        
+        # Send message asynchronously
+        worker = message_worker(user_input)
         worker.signals.result.connect(self.restore_ui)
         QThreadPool.globalInstance().start(worker)
 
     def restore_ui(self, response):
         self.chat_response.emit(response)
-        self.ui.textEdit_output.setText(response)
-        self.ui.textEdit_input.clear()
+        
+        # Add bot message to history and display
+        self.conversation_history.append(("bot", response))
+        self.display_conversation()
+        
         self.ui.pushButton.setEnabled(True)
 
     def eventFilter(self, obj, event):
@@ -42,9 +51,43 @@ class ChatWindow(QMainWindow):
                 self.message_send()
         return super().eventFilter(obj,event)
     
+    def display_conversation(self):
+        """Display conversation with ChatGPT-style formatting"""
+        html_content = '<html><body style="font-family: Arial, sans-serif; margin: 0; padding: 10px;">'
+        
+        for role, message in self.conversation_history:
+            if role == "user":
+                # User message: left-aligned, light blue background
+                html_content += f'''
+                <div style="margin: 8px 0; display: flex; justify-content: flex-end;">
+                    <div style="background-color: #E3F2FD; color: #000; padding: 10px 14px; 
+                                border-radius: 12px; max-width: 70%; word-wrap: break-word;">
+                        {message}
+                    </div>
+                </div>
+                '''
+            else:
+                # Bot message: right-aligned, light gray background
+                html_content += f'''
+                <div style="margin: 8px 0; display: flex; justify-content: flex-start;">
+                    <div style="background-color: #F5F5F5; color: #000; padding: 10px 14px; 
+                                border-radius: 12px; max-width: 70%; word-wrap: break-word;">
+                        {message}
+                    </div>
+                </div>
+                '''
+        
+        html_content += '</body></html>'
+        self.ui.textBrowser_conversation.setHtml(html_content)
+        
+        # Scroll to bottom
+        scrollbar = self.ui.textBrowser_conversation.verticalScrollBar()
+        scrollbar.setValue(scrollbar.maximum())
+
+    
     def move_then_show(self, x:int, y:int):
         #x and y are coords of buddy_window
-        self.move(x-self.width(),y-self.height())
+        self.move_no_show(x,y)
         self.show()
 
     def move_no_show(self, x:int, y:int):
