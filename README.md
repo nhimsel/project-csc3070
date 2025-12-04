@@ -36,4 +36,5 @@ This file should be located in the same directory as `main.py`
 
 ```
 api_url - url for openai-compatible llm api (default: http://127.0.0.1:5000/v1/chat/completions)
+hide_on_fullscreen - can be true or false. determines whether the buddy is visible when a fullscreen app is detected
 ```
