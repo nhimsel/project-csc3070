@@ -30,7 +30,6 @@
     <property name="bottomMargin">
      <number>5</number>
     </property>
-    <!-- header QLabel removed -->
     <item>
      <widget class="QTextBrowser" name="textBrowser_conversation">
       <property name="sizePolicy">

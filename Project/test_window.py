@@ -16,7 +16,7 @@ class MainWindow(QWidget):
         self.button3 = QPushButton("talk")
         self.button4 = QPushButton("wave")
         self.button5 = QPushButton("blink")
-        self.button6 = QPushButton("CrazyThrow")
+        self.button6 = QPushButton("CrazyThrowCrop")
         self.button7 = QPushButton("return")
 
         # Connect signals
@@ -51,6 +51,6 @@ class MainWindow(QWidget):
     def on_button5_clicked(self):
         self.switchGif.emit("blink.gif")
     def on_button6_clicked(self):
-        self.switchGif.emit("CrazyThrow.gif")
+        self.switchGif.emit("CrazyThrowCrop.gif")
     def on_button7_clicked(self):
         self.buddy_window.move_to_bottom_right()

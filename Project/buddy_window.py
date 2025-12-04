@@ -23,7 +23,7 @@ class ShapedWindow(QWidget):
 
         self.idle_image = anim_dir / "default.gif"
         self.drag_gif   = anim_dir / "blink.gif"
-        self.throw_gif   = anim_dir / "CrazyThrow.gif"
+        self.throw_gif   = anim_dir / "CrazyThrowCrop.gif"
 
         self.is_dragging = False
 
@@ -106,7 +106,7 @@ class ShapedWindow(QWidget):
         self.target_x = screen_rect.right() - self.width()
         self.target_y = screen_rect.bottom() - self.height()
 
-        self.vx = 2
+        self.vx = 1
         self.vy = 0
 
         if (self.target_x > self.x()):
@@ -332,8 +332,9 @@ class ShapedWindow(QWidget):
         self.offset = None
         self.is_dragging = False
         self.is_airborne = True
-        self.cur_anim = self.throw_gif
-        self.switch_gif(str(self.throw_gif))
+        if self.y() < 760:
+            self.cur_anim = self.throw_gif
+            self.switch_gif(str(self.throw_gif))
 
         if len(self.drag_history) > 1:
             t0, x0, y0 = self.drag_history[0]
