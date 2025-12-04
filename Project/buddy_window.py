@@ -15,11 +15,16 @@ class ShapedWindow(QWidget):
     chatSignalShow = Signal(int, int)
     chatSignalMove = Signal(int, int)
     killSignal = Signal()
-    cur_anim = anim_dir / "default.gif"
+    cur_anim = anim_dir / "null"
 
     def __init__(self):
-        image_path=os.path.join(anim_dir, self.cur_anim)
         super().__init__()
+
+        # normalized current animation filename (e.g. "default.gif")
+        try:
+            self.cur_anim_name = os.path.basename(str(self.cur_anim))
+        except Exception:
+            self.cur_anim_name = None
 
         self.idle_image = anim_dir / "default.gif"
         self.drag_gif   = anim_dir / "blink.gif"
@@ -34,7 +39,8 @@ class ShapedWindow(QWidget):
         self.offset = None
 
         self.movie = None
-        self.switch_gif(str(image_path))
+        
+        self.switch_gif(str(self.idle_image))
 
         self.tray = TrayIcon(self)
 
@@ -246,10 +252,29 @@ class ShapedWindow(QWidget):
         I can't figure out why
         single frame gifs are fine tho
         """
-        if (self.cur_anim!=animation):
-            image_path=os.path.join(anim_dir, animation)
-            self.cur_anim=image_path
-            self.set_image(image_path)
+        # Normalize animation identifier
+        anim_name = os.path.basename(str(animation))
+
+        # Commands: hide / restore
+        if anim_name == "hide" or str(animation) == "hide":
+            if not self.isHidden():
+                self.hide()
+            return
+
+        if anim_name == "restore" or str(animation) == "restore":
+            if self.isHidden():
+                self.show()
+            return
+
+        # Ignore repeat calls for the same animation
+        if anim_name and anim_name == getattr(self, "cur_anim_name", None):
+            return
+
+        # Switch to new animation file
+        image_path = os.path.join(anim_dir, anim_name)
+        self.cur_anim = image_path
+        self.cur_anim_name = anim_name
+        self.set_image(image_path)
 
     def play_gif_once(self, animation: str):
        """Play a GIF once, then revert to the previous animation."""
