@@ -20,6 +20,7 @@ class ChatWindow(QMainWindow):
 
         self.setWindowTitle("chat")
         self.ui.textEdit_input.installEventFilter(self)
+        self.window().installEventFilter(self)
         self.ui.pushButton.clicked.connect(self.message_send)
         self.conversation_history = []  # Store conversation history
 
@@ -50,6 +51,15 @@ class ChatWindow(QMainWindow):
         if event.type() == QEvent.Type.KeyPress and obj is self.ui.textEdit_input:
             if event.key() == Qt.Key.Key_Return and self.ui.textEdit_input.hasFocus():
                 self.message_send()
+        else:
+            # hook minimization, redirect to self.hide()
+            if event.type() == QEvent.WindowStateChange:
+                print("state changed")
+                if self.windowState() & Qt.WindowState.WindowMinimized:
+                    print("minimized")
+                    self.hide()
+                    # unminimize
+                    self.setWindowState(self.windowState() & ~Qt.WindowState.WindowMinimized)
         return super().eventFilter(obj,event)
     
     def display_conversation(self):
