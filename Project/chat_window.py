@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QMainWindow, QApplication
 from PySide6.QtCore import QEvent, Qt, QRunnable, Slot, Signal, QThreadPool, QObject
+from PySide6.QtGui import QPalette, QColor
 
 # Important:
 # You need to run the following command to generate the ui_form.py file
@@ -52,57 +53,57 @@ class ChatWindow(QMainWindow):
         return super().eventFilter(obj,event)
     
     def display_conversation(self):
-        """Display conversation with chat-style left/right bubbles that work in QTextBrowser"""
+        """Display conversation with chat-style left/right bubbles that adapt to light/dark mode"""
 
-        html = """
+        def is_dark_mode():
+            app = QApplication.instance()
+            if not app:
+                return False
+            pal = app.palette()
+            bg = pal.color(QPalette.Window)
+            # calculate luminance
+            r, g, b = bg.red(), bg.green(), bg.blue()
+            luminance = 0.299 * r + 0.587 * g + 0.114 * b
+            return luminance < 128
+
+        dark = is_dark_mode()
+
+        # Colors for light/dark modes
+        if dark:
+            page_bg = QApplication.instance().palette().color(QPalette.Window).name()
+            user_text = "#FFFFFF"
+            bot_text = "#FFFFFF"
+        else:
+            page_bg = "#FFFFFF"
+            user_text = "#000000"
+            bot_text = "#000000"
+
+        html = f"""
         <html>
         <head>
             <style>
-                .msg-container {
-                    width: 100%;
-                    margin: 6px 0;
-                    overflow: auto; /* ensures float clears correctly */
-                }
-                .user-bubble {
-                    float: right;
-                    display: block;
-                    text-align: right;
-                    /*background-color: #E3F2FD;*/
-                    color: #000;
-                    padding: 10px 14px;
-                    border-radius: 12px;
-                    max-width: 70%;
-                    word-wrap: break-word;
-                    margin-left: 40%;
-                }
-                .bot-bubble {
-                    float: left;
-                    display: block;
-                    text-align: left;
-                    /*background-color: #F5F5F5;*/
-                    color: #000;
-                    padding: 10px 14px;
-                    border-radius: 12px;
-                    max-width: 70%;
-                    word-wrap: break-word;
-                    margin-right: 40%;
-                }
+                body {{ background: {page_bg}; font-family: Arial, sans-serif; padding: 10px; }}
+                .msg-container {{ width: 100%; margin: 6px 0; overflow: auto; clear: both; }}
+                .user-bubble {{ float: right; display: block; text-align: right; color: {user_text}; padding: 10px 14px; border-radius: 12px; max-width: 70%; word-wrap: break-word; margin-left: 20%; }}
+                .bot-bubble {{ float: left; display: block; text-align: left; color: {bot_text}; padding: 10px 14px; border-radius: 12px; max-width: 70%; word-wrap: break-word; margin-right: 20%; }}
+                .meta {{ font-size: 10px; opacity: 0.7; margin-bottom: 4px; }}
             </style>
         </head>
-        <body style="font-family: Arial; padding: 10px;">
+        <body>
         """
 
         for role, message in self.conversation_history:
+            safe_message = (message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('\n', '<br>'))
             if role == "user":
                 html += f"""
                 <div class="msg-container">
-                    <div class="user-bubble">{message}</div>
+                    <div class="user-bubble">{safe_message}</div>
                 </div>
                 """
             else:
                 html += f"""
                 <div class="msg-container">
-                    <div class="bot-bubble">{message}</div>
+                    <div class="bot-bubble">{safe_message}</div>
                 </div>
                 """
 
