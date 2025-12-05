@@ -139,7 +139,17 @@ class ChatWindow(QMainWindow):
     def move_then_show(self, x:int, y:int):
         #x and y are coords of buddy_window
         self.move_no_show(x,y)
-        self.show()
+        # If hidden, show; if minimized, restore. Then raise and activate so it appears on top.
+        if self.isHidden():
+            self.show()
+
+        # If somehow minimized, clear minimized state
+        if self.isMinimized():
+            self.setWindowState(self.windowState() & ~Qt.WindowState.WindowMinimized)
+
+        # Bring to front
+        self.raise_()
+        self.activateWindow()
 
     def move_no_show(self, x:int, y:int):
         #x and y are coords of buddy_window
