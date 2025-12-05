@@ -1,5 +1,4 @@
 # Use a pipeline as a high-level helper
-from transformers import pipeline
 from PySide6.QtCore import Signal, QObject
 import threading
 
@@ -34,6 +33,9 @@ class EmotionHandler(QObject):
     def _load_pipeline(self):
         # for more info on the model, see https://huggingface.co/michellejieli/emotion_text_classifier
         try:
+            # Import locally to avoid heavy startup cost at module import time
+            from transformers import pipeline
+
             self.pipe = pipeline("text-classification", model="michellejieli/emotion_text_classifier")
         finally:
             self._loading = False
