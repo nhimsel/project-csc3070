@@ -90,11 +90,9 @@ class ChatWindow(QMainWindow):
 
         # Colors for light/dark modes
         if dark:
-            page_bg = QApplication.instance().palette().color(QPalette.Window).name()
             user_text = "#FFFFFF"
             bot_text = "#FFFFFF"
         else:
-            page_bg = "#FFFFFF"
             user_text = "#000000"
             bot_text = "#000000"
 
@@ -102,7 +100,7 @@ class ChatWindow(QMainWindow):
         <html>
         <head>
             <style>
-                body {{ background: {page_bg}; font-family: Arial, sans-serif; padding: 10px; }}
+                body {{ font-family: Arial, sans-serif; padding: 10px; }}
                 .msg-container {{ width: 100%; margin: 6px 0; overflow: auto; clear: both; }}
                 .user-bubble {{ float: right; display: block; text-align: right; color: {user_text}; padding: 10px 14px; border-radius: 12px; max-width: 70%; word-wrap: break-word; margin-left: 20%; }}
                 .bot-bubble {{ float: left; display: block; text-align: left; color: {bot_text}; padding: 10px 14px; border-radius: 12px; max-width: 70%; word-wrap: break-word; margin-right: 20%; }}
