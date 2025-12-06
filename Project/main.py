@@ -2,7 +2,6 @@ import sys
 from PySide6.QtWidgets import QApplication, QSystemTrayIcon
 from chat_window import ChatWindow
 from buddy_window import ShapedWindow
-from test_window import MainWindow
 from text_emotion_detector import EmotionHandler
 from win32_window_parser import VideoScanner
 
@@ -23,10 +22,6 @@ if __name__ == "__main__":
     emotions.swap_signal.connect(buddy_win.play_gif_once)
     videos.found.connect(buddy_win.switch_gif)
     videos.start()
-
-    test_win = MainWindow(buddy_win)
-    test_win.switchGif.connect(buddy_win.switch_gif)
-    test_win.show()
 
     if QSystemTrayIcon.isSystemTrayAvailable():
         app.setQuitOnLastWindowClosed(False)
