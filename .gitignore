@@ -1,1 +1,7 @@
 venv
+
+# ignore pyinstaller stuff
+build
+dist
+*.spec
+nul
