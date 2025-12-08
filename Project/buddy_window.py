@@ -6,10 +6,13 @@ from PySide6.QtCore import Qt, Signal, QTimer, QObject
 from PySide6.QtGui import QMovie, QGuiApplication
 from PySide6.QtWidgets import QApplication, QLabel, QWidget, QSystemTrayIcon
 from tray import TrayIcon
+from config import load
+
+outfit = load("outfit")
 
 # ensure in correct directory
 source_dir = Path(__file__).parent.resolve()
-anim_dir = source_dir / "anims"
+anim_dir = source_dir / "anims" / outfit
 
 class ShapedWindow(QWidget):
     chatSignalShow = Signal(int, int)
@@ -264,6 +267,9 @@ class ShapedWindow(QWidget):
         if anim_name == "restore" or str(animation) == "restore":
             if self.isHidden():
                 self.show()
+            else:
+                if self.cur_anim == str(anim_dir / "popcorn.gif"):
+                    self.switch_gif("default.gif")
             return
 
         # Ignore repeat calls for the same animation

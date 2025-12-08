@@ -31,7 +31,7 @@ class VideoScanner(QThread):
                 if title:
                     self.found.emit("popcorn.gif")
                 else:
-                    self.found.emit("default.gif")
+                    self.found.emit("restore")
                 self.sleep(1)
 
 # Callback function for EnumWindows
