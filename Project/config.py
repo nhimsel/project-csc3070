@@ -8,6 +8,12 @@ from typing import Any, Optional
 # `sys._MEIPASS`. Use that path when available, otherwise fall back to the
 # source file directory. This makes the code work in normal and frozen builds.
 
+# Default configuration values
+DEFAULTS: dict[str, Any] = {
+    "api_url": "http://127.0.0.1:5000/v1/chat/completions",
+    "hide_on_fullscreen": False,
+    "outfit": "default"
+}
 
 _config: Optional[dict] = None
 
@@ -53,17 +59,24 @@ def _ensure_loaded() -> None:
 
 def load(key: str, default: Any = None) -> Any:
     """
-    Return the value for `key` from config.json.
+    Return the value for `key` from config.json, with fallback to DEFAULTS.
 
-    - If the config file is missing this will raise FileNotFoundError unless
-      a non-None `default` is provided (in which case the default is returned).
-    - If the key is not present in the config, `default` is returned.
+    - If the config file is missing, returns the value from DEFAULTS[key] if present,
+      otherwise returns the provided `default` parameter (or None).
+    - If the key is not present in the config, checks DEFAULTS[key] next, then
+      falls back to the provided `default` parameter (or None).
     """
     try:
         _ensure_loaded()
     except FileNotFoundError:
-        if default is not None:
-            return default
-        raise
+        # Config file missing; use DEFAULTS or the provided default
+        if key in DEFAULTS:
+            return DEFAULTS[key]
+        return default
 
-    return _config.get(key, default)
+    # Config file loaded; check it first, then DEFAULTS, then the provided default
+    if key in _config:
+        return _config[key]
+    if key in DEFAULTS:
+        return DEFAULTS[key]
+    return default

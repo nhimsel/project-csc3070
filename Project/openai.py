@@ -6,13 +6,7 @@ import json
 import config
 
 
-DEFAULT_URL="http://127.0.0.1:5000/v1/chat/completions"
-
-# try to load config, else use DEFAULT
-try:
-    url=config.load("api_url")
-except Exception:
-    url=DEFAULT_URL
+url=config.load("api_url")
 
 headers = {
     "Content-Type": "application/json"

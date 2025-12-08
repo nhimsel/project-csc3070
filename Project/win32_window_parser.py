@@ -9,11 +9,7 @@ from config import load
 
 from PySide6.QtCore import QThread, Signal
 
-HIDE_ON_FULLSCREEN_DEFAULT = False
-try:
-    hide_on_fullscreen = load("hide_on_fullscreen")
-except Exception:
-    hide_on_fullscreen = HIDE_ON_FULLSCREEN_DEFAULT
+hide_on_fullscreen = load("hide_on_fullscreen")
 
 
 class VideoScanner(QThread):
