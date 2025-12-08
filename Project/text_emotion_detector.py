@@ -74,13 +74,13 @@ class EmotionHandler(QObject):
             case "neutral":
                 self.swap_signal.emit("talk.gif")
             case "anger":
-                print("give me an anim")
+                self.swap_signal.emit("fury.gif")
             case "sadness":
-                print("give me an anim")
+                self.swap_signal.emit("depression.gif")
             case "fear":
-                print("give me an anim")
+                print("no anim for: fear")
             case "surprise":
-                print("give me an anim")
+                print("no anim for: surprise")
 
 
 # alternate implementation using the existing llm infrastructure

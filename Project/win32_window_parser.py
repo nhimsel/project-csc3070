@@ -33,8 +33,9 @@ class VideoScanner(QThread):
             while True:
                 title = find_video_players()
                 if title:
-                    # waiting on popcorn.gif from caleb
-                    self.found.emit("wave.gif")
+                    self.found.emit("popcorn.gif")
+                else:
+                    self.found.emit("default.gif")
                 self.sleep(1)
 
 # Callback function for EnumWindows
