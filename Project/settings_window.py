@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QFormLayout,
     QLineEdit,
+    QLabel,
     QPushButton,
     QMessageBox,
     QCheckBox,
@@ -79,9 +80,13 @@ class SettingsUI(QWidget):
         """
 
         layout.addWidget(self.save_btn)
-        """
-        layout.addWidget(self.reload_btn)
-        """
+        # Add note under Save button
+        self.restart_note = QLabel("Changes will take effect after restarting the app.")
+        self.restart_note.setStyleSheet("color: gray; font-size: 10pt; margin-top: 0px;")
+        self.restart_note.setWordWrap(False)
+        self.restart_note.setMaximumHeight(20)
+        layout.addWidget(self.restart_note)
+        # layout.addWidget(self.reload_btn)
 
         # Load config immediately
         self.load_config()
