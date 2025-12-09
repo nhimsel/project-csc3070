@@ -126,19 +126,6 @@ class ShapedWindow(QWidget):
             self.is_walking = True
             self.switch_gif("walk.gif")
 
-        self.walk_timer = QTimer()
-        self.walk_timer.timeout.connect(lambda: self.update_walk(self.target_x, self.vx))
-        self.walk_timer.start(16)
-
-    def update_walk(self, target_x, vx):
-        self.move(self.x() + self.vx, self.y())
-        if int(self.x()) >= self.target_x:
-            self.vx = 0
-            self.walk_timer.stop()
-            self.move(self.target_x, self.y())
-            self.is_walking = False  # reset flag
-            self.switch_gif("default.gif")  # return to default animation
-
     def update_physics(self):
         # No gravity while dragging
         if self.is_dragging:
