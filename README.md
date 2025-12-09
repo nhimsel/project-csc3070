@@ -12,11 +12,7 @@ Downloads for pre-built binaries can be found under [Releases](https://github.co
 
 ### Configuration:
 
-Configuration is done in `config.json`.
-
-If compiled to an exe, `config.json` should be in the same directory as the exe.
-
-If not compiled, `config.json` should be in the same directory as `main.py`.
+The configuration is best done via the `Settings` panel found in the tray icon. 
 
 #### Options
 
