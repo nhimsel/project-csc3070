@@ -1,4 +1,3 @@
-import os
 from PySide6.QtCore import QObject, QTimer
 from PySide6.QtWidgets import (
     QApplication,
@@ -29,21 +28,25 @@ class TrayIcon(QObject):
         self.tray.setIcon(icon)
         self.tray.setToolTip(self.window.windowTitle() or "Buddy")
 
-        menu = QMenu(self.window)
-        restore = QAction("Restore", self.window)
-        settings = QAction("Settings", self.window)
-        quit_action = QAction("Exit", self.window)
-        menu.addAction(restore)
-        menu.addAction(settings)
-        menu.addAction(quit_action)
+        self.menu = QMenu(self.window)
+        self.restore = QAction("Restore", self.window)
+        self.settings = QAction("Settings", self.window)
+        self.quit_action = QAction("Exit", self.window)
+        
+        self.menu.addAction(self.restore)
+        self.menu.addAction(self.settings)
+        self.menu.addAction(self.quit_action)
 
-        restore.triggered.connect(self.show_window)
-        settings.triggered.connect(self.show_settings)
-        quit_action.triggered.connect(self.quit)
+        self.restore.triggered.connect(self.show_window)
+        self.settings.triggered.connect(self.show_settings)
+        self.quit_action.triggered.connect(self.quit)
 
-        self.tray.setContextMenu(menu)
+        self.tray.setContextMenu(self.menu)
         self.tray.activated.connect(self._on_activated)
         self.tray.show()
+
+        # **NEW**: Initially update the restore action visibility based on the window state
+        self.update_restore_action()
 
     def _on_activated(self, reason):
         # only toggle on explicit click/double-click; ignore hover/context events
@@ -60,10 +63,16 @@ class TrayIcon(QObject):
         else:
             self.show_window()
 
+        # **NEW**: Update the restore button after window visibility changes
+        self.update_restore_action()
+
     def show_window(self):
         self.window.showNormal()
         self.window.raise_()
         self.window.activateWindow()
+
+        # **NEW**: Update the restore button after window visibility changes
+        self.update_restore_action()
 
     def show_settings(self):
         dialog = QDialog(self.window)
@@ -130,3 +139,10 @@ class TrayIcon(QObject):
         if self.tray:
             # use information icon by default; desktop may suppress messages
             self.tray.showMessage(title, text)
+
+    def update_restore_action(self):
+        """Update the visibility of the restore action based on window visibility."""
+        if self.window.isVisible():
+            self.restore.setVisible(False)  # Hide restore button when window is visible
+        else:
+            self.restore.setVisible(True)   # Show restore button when window is hidden
