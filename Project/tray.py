@@ -2,11 +2,15 @@ import os
 from PySide6.QtCore import QObject, QTimer
 from PySide6.QtWidgets import (
     QApplication,
+    QMainWindow,
     QSystemTrayIcon,
     QMenu,
     QStyle,
+    QDialog,
+    QVBoxLayout,
 )
 from PySide6.QtGui import QAction, QIcon
+from settings_window import SettingsUI
 
 
 class TrayIcon(QObject):
@@ -27,11 +31,14 @@ class TrayIcon(QObject):
 
         menu = QMenu(self.window)
         restore = QAction("Restore", self.window)
+        settings = QAction("Settings", self.window)
         quit_action = QAction("Exit", self.window)
         menu.addAction(restore)
+        menu.addAction(settings)
         menu.addAction(quit_action)
 
         restore.triggered.connect(self.show_window)
+        settings.triggered.connect(self.show_settings)
         quit_action.triggered.connect(self.quit)
 
         self.tray.setContextMenu(menu)
@@ -57,6 +64,43 @@ class TrayIcon(QObject):
         self.window.showNormal()
         self.window.raise_()
         self.window.activateWindow()
+
+    def show_settings(self):
+        dialog = QDialog(self.window)
+        dialog.setWindowTitle("Settings")
+        dialog.resize(600, 400)
+        
+        layout = QVBoxLayout(dialog)
+        settings_ui = SettingsUI(dialog)
+        layout.addWidget(settings_ui)
+
+        # center dialog on screen
+        self.center_dialog_on_screen(dialog)
+        
+        dialog.exec()
+
+    def center_dialog_on_screen(self, dialog: QDialog):
+        # Get the screen where the dialog's parent window is currently located
+        parent_widget = dialog.parent() if dialog.parent() else QApplication.activeWindow()
+    
+        if parent_widget:
+            screen = QApplication.screenAt(parent_widget.geometry().center())
+        else:
+            screen = QApplication.primaryScreen()
+
+        if not screen:
+            screen = QApplication.primaryScreen()
+
+        # Get the geometry of the current screen
+        screen_geometry = screen.availableGeometry()
+
+        # Calculate position to center the dialog on the screen
+        dialog_rect = dialog.geometry()
+        x = (screen_geometry.width() - dialog_rect.width()) // 2
+        y = (screen_geometry.height() - dialog_rect.height()) // 2
+
+        # Move the dialog to the center of the screen
+        dialog.move(screen_geometry.left() + x, screen_geometry.top() + y)
 
     def quit(self):
         # Hide the tray icon immediately

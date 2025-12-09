@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from PySide6.QtWidgets import (
+    QApplication,
     QWidget,
     QVBoxLayout,
     QFormLayout,
@@ -20,8 +21,8 @@ from PySide6.QtWidgets import (
     QPushButton,
     QMessageBox,
     QCheckBox,
-    QLabel,
 )
+from PySide6.QtGui import QScreen
 import config
 
 
@@ -65,11 +66,15 @@ class SettingsUI(QWidget):
         self.save_btn = QPushButton("Save")
         self.save_btn.clicked.connect(self.save_config)
 
+        """
         self.reload_btn = QPushButton("Reload")
         self.reload_btn.clicked.connect(self.load_config)
+        """
 
         layout.addWidget(self.save_btn)
+        """
         layout.addWidget(self.reload_btn)
+        """
 
         # Load config immediately
         self.load_config()
@@ -149,4 +154,3 @@ class SettingsUI(QWidget):
 
         except Exception as e:
             QMessageBox.critical(self, "Save Error", f"Failed to save config:\n{e}")
-
