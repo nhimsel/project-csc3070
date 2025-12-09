@@ -21,21 +21,20 @@ def _get_config_path() -> Path:
     """Return the most appropriate config.json path.
 
     Preference order:
-      1. Directory next to the running executable (`sys.executable`) — this
+      1. The source file directory (`__file__`) — useful during development.
+      2. Directory next to the running executable (`sys.executable`) — this
          is where a user-accessible `config.json` should live for bundled apps.
-      2. The source file directory (`__file__`) — useful during development.
       3. PyInstaller unpack dir (`sys._MEIPASS`) — fallback when resources are
          bundled inside the package (useful for --onefile when you included
          a default config in the bundle).
     The function returns the first existing `config.json` it finds; if none
-    exist, it returns the path next to the executable (where we expect the
-    user to place it).
+    exist, it returns the path next to the source script directory.
     """
-    exe_dir = Path(sys.executable).resolve().parent
     script_dir = Path(__file__).resolve().parent
+    exe_dir = Path(sys.executable).resolve().parent
     meipass_dir = Path(getattr(sys, "_MEIPASS", "")) if getattr(sys, "_MEIPASS", None) else None
 
-    candidates = [exe_dir, script_dir]
+    candidates = [script_dir, exe_dir]
     if meipass_dir:
         candidates.append(meipass_dir)
 
@@ -44,8 +43,8 @@ def _get_config_path() -> Path:
         if cfg.exists():
             return cfg
 
-    # If none exist, return the user-facing location next to the executable.
-    return exe_dir / "config.json"
+    # If none exist, return the script directory location (Project/).
+    return script_dir / "config.json"
 
 def _ensure_loaded() -> None:
     global _config
