@@ -19,6 +19,8 @@ class ShapedWindow(QWidget):
     chatSignalMove = Signal(int, int)
     killSignal = Signal()
     cur_anim = anim_dir / "null"
+    # determines whether or not buddy is shown. only modify via tray icon
+    hide_buddy = False
 
     def __init__(self):
         super().__init__()
@@ -257,6 +259,10 @@ class ShapedWindow(QWidget):
         """
         # Normalize animation identifier
         anim_name = os.path.basename(str(animation))
+
+        # specifically for tray icon hiding
+        if self.hide_buddy:
+            return
 
         # Commands: hide / restore
         if anim_name == "hide" or str(animation) == "hide":

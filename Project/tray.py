@@ -58,15 +58,18 @@ class TrayIcon(QObject):
 
     def toggle(self):
         if self.window.isVisible():
+            self.window.hide_buddy = True
             self.window.hide()
             self.window.killSignal.emit()
         else:
+            self.window.hide_buddy = False
             self.show_window()
 
         # **NEW**: Update the restore button after window visibility changes
         self.update_restore_action()
 
     def show_window(self):
+        self.window.hide_buddy = False
         self.window.showNormal()
         self.window.raise_()
         self.window.activateWindow()
