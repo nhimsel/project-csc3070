@@ -112,6 +112,8 @@ def find_fullscreen_windows():
             continue
         if title.strip().lower() == "program manager":
             continue
+        if title.strip().lower() == "nvidia geforce overlay dt":
+            continue
 
         pid = get_process_id_from_hwnd(hwnd)
         proc_name = None
