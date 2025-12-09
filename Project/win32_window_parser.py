@@ -11,7 +11,6 @@ from PySide6.QtCore import QThread, Signal
 
 hide_on_fullscreen = load("hide_on_fullscreen")
 
-
 class VideoScanner(QThread):
     found = Signal(str)
     
@@ -20,6 +19,7 @@ class VideoScanner(QThread):
         if(hide_on_fullscreen):
             while True:
                 match = find_fullscreen_windows()
+                print(match)
                 if match:
                     self.found.emit("hide")
                 else:
@@ -33,6 +33,83 @@ class VideoScanner(QThread):
                 else:
                     self.found.emit("restore")
                 self.sleep(1)
+
+
+def is_overlay_or_system_window(hwnd):
+    """Check if a window is an overlay, system utility, or background window.
+    Returns True if the window should be excluded.
+    """
+    try:
+        # Get window class name
+        cls = win32gui.GetClassName(hwnd).lower()
+        
+        # Exclude known overlay and system window classes
+        excluded_classes = {
+            "progman", "workerw",  # Desktop windows
+            "tooltips_class32",    # Tooltips
+            "ncontent",            # Nvidia overlay
+            "ime",                 # IME windows
+            "msctls_statusbar32",  # Status bars
+            "button",              # Various system buttons
+            "static",              # Static controls
+            "combobox",            # System controls
+        }
+        
+        if cls in excluded_classes:
+            return True
+        
+        # Get window title
+        title = get_window_title_from_hwnd(hwnd)
+        if not title:
+            return True
+        
+        title_lower = title.strip().lower()
+        
+        # Exclude known overlay and system window titles
+        excluded_titles = {
+            "program manager",
+            "nvidia geforce overlay",
+            "nvidia geforce overlay dt",
+            "windows input experience",
+            "input experience",
+            "cortana",
+            "windows shell experience host",
+        }
+        
+        if any(excluded in title_lower for excluded in excluded_titles):
+            return True
+        
+        # Get extended style
+        exstyle = win32gui.GetWindowLong(hwnd, win32gui.GWL_EXSTYLE)
+        
+        # Exclude tool windows
+        if exstyle & win32gui.WS_EX_TOOLWINDOW:
+            return True
+        
+        return False
+    except Exception:
+        return False
+
+
+def is_user_facing(hwnd):
+    """Check if a window is user-facing (visible on desktop or in taskbar).
+    A window is user-facing if:
+    - It's visible
+    - It's not an overlay or system window
+    """
+    try:
+        # Check if window is visible
+        if not win32gui.IsWindowVisible(hwnd):
+            return False
+        
+        # Exclude overlays and system windows
+        if is_overlay_or_system_window(hwnd):
+            return False
+        
+        return True
+    except Exception:
+        return False
+
 
 # Callback function for EnumWindows
 def enum_windows_callback(hwnd, windows):
@@ -83,8 +160,8 @@ def is_fullscreen(hwnd):
     return window_width == screen_width and window_height == screen_height
 
 def enum_windows(hwnd, result):
-    # Filter only visible windows
-    if win32gui.IsWindowVisible(hwnd):
+    # Filter only user-facing windows
+    if is_user_facing(hwnd):
         # Check if the window is fullscreen
         if is_fullscreen(hwnd):
             result.append(hwnd)
@@ -109,10 +186,6 @@ def find_fullscreen_windows():
 
         title = get_window_title_from_hwnd(hwnd)
         if not title or not str(title).strip():
-            continue
-        if title.strip().lower() == "program manager":
-            continue
-        if title.strip().lower() == "nvidia geforce overlay dt":
             continue
 
         pid = get_process_id_from_hwnd(hwnd)
