@@ -37,6 +37,8 @@ class ShapedWindow(QWidget):
         self.throw_gif   = anim_dir / "CrazyThrow.gif"
 
         self.is_dragging = False
+        self.is_airborne = False
+        self.is_walking = False
 
         self.label = QLabel(self)
         self.label.setAttribute(Qt.WA_TranslucentBackground)
@@ -126,8 +128,10 @@ class ShapedWindow(QWidget):
                 # move chat window with buddy
                 self.emit_pos(False)
                 self.switch_gif("walk.gif")
+                self.is_walking = True
             else:
                 self.switch_gif(str(self.idle_image))
+                self.is_walking = False
 
     def update_physics(self):
         # No gravity while dragging
@@ -242,6 +246,9 @@ class ShapedWindow(QWidget):
         if self.hide_buddy:
             return
 
+        if self.is_airborne and anim_name != "CrazyThrow.gif":
+            return
+
         # Commands: hide / restore
         if anim_name == "hide" or str(animation) == "hide":
             if not self.isHidden():
@@ -254,7 +261,14 @@ class ShapedWindow(QWidget):
             else:
                 if self.cur_anim == str(anim_dir / "popcorn.gif"):
                     self.switch_gif("default.gif")
+                    self.stop_walking = False
             return
+
+        if anim_name == "popcorn.gif":
+            # don't switch to popcorn if walking
+            if self.is_walking:
+                return
+            self.stop_walking = True
 
         # Ignore repeat calls for the same animation
         if anim_name and anim_name == getattr(self, "cur_anim_name", None):
