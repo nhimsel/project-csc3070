@@ -295,7 +295,6 @@ class ShapedWindow(QWidget):
         def on_movie_finished():
             self.movie.stop()
             if str(prev_anim) == "walk.gif":
-                self.stop_walking = False
                 self.switch_gif("walk.gif")
             else:
                 self.switch_gif(prev_anim)
@@ -308,7 +307,6 @@ class ShapedWindow(QWidget):
                 # Stop movie and revert to previous animation
                 self.movie.stop()
                 if str(prev_anim) == "walk.gif":
-                    self.stop_walking = False
                     self.switch_gif("walk.gif")
                 else:
                     self.switch_gif(prev_anim)
@@ -326,6 +324,9 @@ class ShapedWindow(QWidget):
     # --- Dragging behavior ---
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            # allow walking once dragged/thrown
+            self.stop_walking = False
+
             self.offset = event.pos()
             self.is_dragging = True
             self.vx = 0
@@ -336,6 +337,10 @@ class ShapedWindow(QWidget):
 
         # send message to open chat on right click
         if event.button() == Qt.RightButton:
+            # disallow walking when chat opened
+            self.switch_gif(str(self.idle_image))
+            self.stop_walking = True
+
             # spawm chat window relative to buddy
             self.emit_pos(True)
             
