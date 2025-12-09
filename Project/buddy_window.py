@@ -31,7 +31,7 @@ class ShapedWindow(QWidget):
 
         self.idle_image = anim_dir / "default.gif"
         self.drag_gif   = anim_dir / "blink.gif"
-        self.throw_gif   = anim_dir / "CrazyThrowCrop.gif"
+        self.throw_gif   = anim_dir / "CrazyThrow.gif"
 
         self.is_dragging = False
 
