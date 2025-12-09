@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QMessageBox,
     QCheckBox,
+        QComboBox,
 )
 from PySide6.QtGui import QScreen
 import config
@@ -38,6 +39,8 @@ class SettingsUI(QWidget):
 
         # Use the script directory (Project/) to locate config.json
         script_dir = Path(__file__).resolve().parent
+        # keep script dir for locating resources
+        self.script_dir = script_dir
         self.config_path = script_dir / "config.json"
         self.config: Dict[str, Any] = {}
 
@@ -52,7 +55,8 @@ class SettingsUI(QWidget):
         # --------------------------------------------------
         self.api_url_field = QLineEdit()
         self.hide_on_fullscreen_field = QCheckBox()
-        self.outfit_field = QLineEdit()
+        # outfit selection: dropdown of folders in `anims/`
+        self.outfit_field = QComboBox()
 
         form.addRow("API URL:", self.api_url_field)
         form.addRow("Hide on Fullscreen:", self.hide_on_fullscreen_field)
@@ -61,6 +65,9 @@ class SettingsUI(QWidget):
         layout.addLayout(form)
 
         # --------------------------------------------------
+        # Populate outfit dropdown from `anims/` before loading config
+        # --------------------------------------------------
+        self._populate_outfit_dropdown()
         # Buttons
         # --------------------------------------------------
         self.save_btn = QPushButton("Save")
@@ -125,7 +132,17 @@ class SettingsUI(QWidget):
         # Fill UI fields
         self.api_url_field.setText(str(self.config["api_url"]))
         self.hide_on_fullscreen_field.setChecked(bool(self.config["hide_on_fullscreen"]))
-        self.outfit_field.setText(str(self.config["outfit"]))
+
+        # Ensure outfits list is current and select value from config
+        self._populate_outfit_dropdown()
+        outfit_value = str(self.config.get("outfit", ""))
+        items = [self.outfit_field.itemText(i) for i in range(self.outfit_field.count())]
+        if outfit_value in items:
+            self.outfit_field.setCurrentIndex(items.index(outfit_value))
+        elif items:
+            # fallback to first available outfit and update config
+            self.outfit_field.setCurrentIndex(0)
+            self.config["outfit"] = items[0]
 
     def _create_default_config(self):
         """Create a config.json file with default values."""
@@ -140,12 +157,27 @@ class SettingsUI(QWidget):
                 f"Failed to create default config file:\n{e}"
             )
 
+    def _populate_outfit_dropdown(self):
+        """Scan `anims/` directory for subfolders and populate the combo box."""
+        try:
+            anims_dir = Path(self.script_dir) / "anims"
+            self.outfit_field.clear()
+            if anims_dir.exists() and anims_dir.is_dir():
+                # list directories only
+                folders = [p.name for p in anims_dir.iterdir() if p.is_dir()]
+                folders.sort()
+                for name in folders:
+                    self.outfit_field.addItem(name)
+        except Exception:
+            # silently ignore; leave combo empty
+            pass
+
     def save_config(self):
         """Save modified settings to config.json."""
         try:
             self.config["api_url"] = self.api_url_field.text()
             self.config["hide_on_fullscreen"] = self.hide_on_fullscreen_field.isChecked()
-            self.config["outfit"] = self.outfit_field.text()
+            self.config["outfit"] = self.outfit_field.currentText()
 
             with self.config_path.open("w", encoding="utf-8") as f:
                 json.dump(self.config, f, indent=4)
