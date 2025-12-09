@@ -215,22 +215,7 @@ class ShapedWindow(QWidget):
             self.movie.deleteLater()
             self.movie = None
 
-        #if is_gif:
         self._init_gif()
-        """
-        else:
-            self._init_static()
-        """
-
-    """
-    def _init_static(self):
-        pixmap = QPixmap(self.image_path)
-        self.label.setPixmap(pixmap)
-        region = self.alpha_region_from_pixmap(pixmap)
-        self.setMask(region)
-        self.label.setMask(pixmap.mask())
-        self.resize(pixmap.size())
-    """
 
     def _init_gif(self):
         self.movie = QMovie(str(self.image_path))
@@ -291,33 +276,43 @@ class ShapedWindow(QWidget):
         self.set_image(image_path)
 
     def play_gif_once(self, animation: str):
-       """Play a GIF once, then revert to the previous animation."""
-       if self.cur_anim == animation:
-           return
+        """Play a GIF once, then revert to the previous animation."""
+        if self.cur_anim == animation:
+            return
 
-       prev_anim = self.cur_anim
-       image_path = os.path.join(anim_dir, animation)
-       self.cur_anim = image_path
+        prev_anim = self.cur_anim
+        image_path = os.path.join(anim_dir, animation)
+        # self.cur_anim = image_path
 
-       if self.movie:
-           self.movie.stop()
-           self.movie.deleteLater()
-           self.movie = None
+        if self.movie:
+            self.movie.stop()
+            self.movie.deleteLater()
+            self.movie = None
 
-       self.movie = QMovie(image_path)
-       self.movie.setCacheMode(QMovie.CacheAll)
-       self.label.setMovie(self.movie)
-       self.movie.frameChanged.connect(self._update_mask)
+        self.movie = QMovie(image_path)
+        self.movie.setCacheMode(QMovie.CacheAll)
+        self.label.setMovie(self.movie)
+        self.movie.frameChanged.connect(self._update_mask)
 
-       # Wait until the movie is valid and frame count is known
-       def check_last_frame(frame_number):
-           if self.movie.frameCount() > 0 and frame_number == self.movie.frameCount() - 1:
-               # Stop movie and revert to previous animation
-               self.movie.stop()
-               self.switch_gif(prev_anim)
+        # Only connect the frameChanged signal if the movie is playing
+        self.movie.start()
 
-       self.movie.frameChanged.connect(check_last_frame)
-       self.movie.start()
+        # Use a single-shot timer to check when the movie is done.
+        def on_movie_finished():
+            self.movie.stop()
+            self.switch_gif(prev_anim)
+
+        # Trigger the finished callback once the last frame has been played
+        self.movie.finished.connect(on_movie_finished)
+        # Wait until the movie is valid and frame count is known
+        def check_last_frame(frame_number):
+            if self.movie.frameCount() > 0 and frame_number == self.movie.frameCount() - 1:
+                # Stop movie and revert to previous animation
+                self.movie.stop()
+                self.switch_gif(prev_anim)
+
+        self.movie.frameChanged.connect(check_last_frame)
+        self.movie.start()
  
     
     # for exclusive use by blinker. blinks once
