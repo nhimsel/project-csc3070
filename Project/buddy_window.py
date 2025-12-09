@@ -21,6 +21,7 @@ class ShapedWindow(QWidget):
     cur_anim = anim_dir / "null"
     # determines whether or not buddy is shown. only modify via tray icon
     hide_buddy = False
+    stop_walking = False
 
     def __init__(self):
         super().__init__()
@@ -120,11 +121,13 @@ class ShapedWindow(QWidget):
         self.vx = 1
         self.vy = 0
 
-        if (self.target_x > self.x()):
-            # move chat window with buddy
-            self.emit_pos(False)
-            self.is_walking = True
-            self.switch_gif("walk.gif")
+        if not self.stop_walking:
+            if (self.target_x > self.x()):
+                # move chat window with buddy
+                self.emit_pos(False)
+                self.switch_gif("walk.gif")
+            else:
+                self.switch_gif(str(self.idle_image))
 
     def update_physics(self):
         # No gravity while dragging
@@ -137,7 +140,8 @@ class ShapedWindow(QWidget):
         y = self.y()
 
         # --- Horizontal motion ---
-        x += self.vx
+        if not self.stop_walking and (os.path.basename(self.cur_anim) == "walk.gif" or os.path.basename(self.cur_anim) == "CrazyThrow.gif"):
+            x += self.vx
 
         # Bounce off left/right edges
         screen_geom = QGuiApplication.primaryScreen().geometry()
@@ -264,12 +268,15 @@ class ShapedWindow(QWidget):
 
     def play_gif_once(self, animation: str):
         """Play a GIF once, then revert to the previous animation."""
-        if self.cur_anim == animation:
+        if str(self.cur_anim) == str(anim_dir / animation):
             return
 
-        prev_anim = self.cur_anim
+        if str(self.cur_anim) == str(anim_dir / "walk.gif"):
+            self.stop_walking = True
+
+        prev_anim = os.path.basename(self.cur_anim)
         image_path = os.path.join(anim_dir, animation)
-        # self.cur_anim = image_path
+        self.cur_anim = image_path
 
         if self.movie:
             self.movie.stop()
@@ -287,7 +294,11 @@ class ShapedWindow(QWidget):
         # Use a single-shot timer to check when the movie is done.
         def on_movie_finished():
             self.movie.stop()
-            self.switch_gif(prev_anim)
+            if str(prev_anim) == "walk.gif":
+                self.stop_walking = False
+                self.switch_gif("walk.gif")
+            else:
+                self.switch_gif(prev_anim)
 
         # Trigger the finished callback once the last frame has been played
         self.movie.finished.connect(on_movie_finished)
@@ -296,7 +307,11 @@ class ShapedWindow(QWidget):
             if self.movie.frameCount() > 0 and frame_number == self.movie.frameCount() - 1:
                 # Stop movie and revert to previous animation
                 self.movie.stop()
-                self.switch_gif(prev_anim)
+                if str(prev_anim) == "walk.gif":
+                    self.stop_walking = False
+                    self.switch_gif("walk.gif")
+                else:
+                    self.switch_gif(prev_anim)
 
         self.movie.frameChanged.connect(check_last_frame)
         self.movie.start()
