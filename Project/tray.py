@@ -41,12 +41,11 @@ class TrayIcon(QObject):
         self.settings.triggered.connect(self.show_settings)
         self.quit_action.triggered.connect(self.quit)
 
+        self.restore.setVisible(False)  # initially hidden since window is shown
+
         self.tray.setContextMenu(self.menu)
         self.tray.activated.connect(self._on_activated)
         self.tray.show()
-
-        # **NEW**: Initially update the restore action visibility based on the window state
-        self.update_restore_action()
 
     def _on_activated(self, reason):
         # only toggle on explicit click/double-click; ignore hover/context events
