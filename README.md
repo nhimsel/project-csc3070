@@ -14,6 +14,10 @@ Downloads for pre-built binaries can be found under [Releases](https://github.co
 
 The configuration is best done via the `Settings` panel found in the tray icon. 
 
+If using a compiled exe, the config file will be in the `_internal` directory.
+
+If directly running via python, the config file will be in the same directory as `main.py`.
+
 #### Options
 
 - `api_url` - url for openai-compatible llm api (default: http://127.0.0.1:5000/v1/chat/completions)
