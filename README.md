@@ -1,9 +1,11 @@
-# Project Name 
+# Deskflop Buddy
 
 
 ### Goal:
 
-Goal 
+Our goal is to provide a friendly AI buddy. 
+It can chat in a friendly manner, with its emotions showing as it replies.
+It can also move around the desktop, reacting to events.
 
 ### Downloads
 
